@@ -1,9 +1,22 @@
 #[derive(Debug)]
+pub struct Token{
+    typ: TokenType,
+    loc: Location,
+}
+
+#[derive(Debug)]
 struct Location{
     file: String,
     line: usize,
     col: usize,
 }
+
+impl std::string::ToString for Location{
+    fn to_string(&self) -> String{
+        String::from(format!("{}:{}:{}", self.file, self.line, self.col))
+    }
+}
+
 
 #[derive(Debug)]
 enum TokenType{
@@ -64,19 +77,6 @@ enum SpecialChar{
     LBracket,
     RBracket,
 }
-
-impl std::string::ToString for Location{
-    fn to_string(&self) -> String{
-        String::from(format!("{}:{}:{}", self.file, self.line, self.col))
-    }
-}
-
-#[derive(Debug)]
-pub struct Token{
-    typ: TokenType,
-    loc: Location,
-}
-
 pub fn lex_file(filename: &String) -> Result<Vec<Token>, String>{
     let lines = match super::read_lines(&filename){
         Ok(val) => val,
