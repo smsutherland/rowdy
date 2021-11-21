@@ -1,3 +1,5 @@
+use std::fmt;
+
 #[derive(Debug)]
 pub struct Token{
     typ: TokenType,
@@ -11,12 +13,11 @@ struct Location{
     col: usize,
 }
 
-impl std::string::ToString for Location{
-    fn to_string(&self) -> String{
-        String::from(format!("{}:{}:{}", self.file, self.line, self.col))
+impl fmt::Display for Location{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}:{}:{}", self.file, self.line, self.col)
     }
 }
-
 
 #[derive(Debug)]
 enum TokenType{
