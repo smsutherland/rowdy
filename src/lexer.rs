@@ -1,25 +1,8 @@
 #[derive(Debug)]
-enum DataType{
-    Int,
-}
-
-#[derive(Debug)]
-enum Operator{
-    Plus,
-    Sub,
-    Assign,
-    Equal,
-    End,
-}
-
-#[derive(Debug)]
-enum SpecialChar{
-    LParen,
-    RParen,
-    LBrace,
-    RBrace,
-    LBracket,
-    RBracket,
+struct Location{
+    file: String,
+    line: usize,
+    col: usize,
 }
 
 #[derive(Debug)]
@@ -59,10 +42,27 @@ impl TokenType{
 }
 
 #[derive(Debug)]
-struct Location{
-    file: String,
-    line: usize,
-    col: usize,
+enum DataType{
+    Int,
+}
+
+#[derive(Debug)]
+enum Operator{
+    Plus,
+    Sub,
+    Assign,
+    Equal,
+    End,
+}
+
+#[derive(Debug)]
+enum SpecialChar{
+    LParen,
+    RParen,
+    LBrace,
+    RBrace,
+    LBracket,
+    RBracket,
 }
 
 impl std::string::ToString for Location{
