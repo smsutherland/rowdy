@@ -1,8 +1,11 @@
 use std::env;
+use std::io::{self, BufRead};
+use std::fs::File;
+use std::path::Path;
 
 #[derive(Debug)]
 pub struct Config{
-    filename: String,
+    pub filename: String,
 }
 
 impl Config{
@@ -15,4 +18,10 @@ impl Config{
     
         Ok(Config{ filename })
     }
+}
+
+pub fn open_file<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+where P: AsRef<Path>, {
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
 }
