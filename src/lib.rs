@@ -3,6 +3,8 @@ use std::io::{self, BufRead};
 use std::fs::File;
 use std::path::Path;
 
+mod lexer;
+
 #[derive(Debug)]
 pub struct Config{
     pub filename: String,
@@ -20,8 +22,18 @@ impl Config{
     }
 }
 
-pub fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
+fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where P: AsRef<Path>, {
     let file = File::open(filename)?;
     Ok(io::BufReader::new(file).lines())
+}
+
+pub fn run(config: Config){
+
+    let tokens = lexer::lex_file(&config.filename).unwrap();
+
+    for token in &tokens{
+        println!("{:?}", token);
+    }
+    println!("{}", tokens.len());
 }
