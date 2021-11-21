@@ -11,14 +11,14 @@ fn main() {
         }
     };
 
-    let lines = match rowdy::open_file(&config.filename){
+    let lines = match rowdy::read_lines(&config.filename){
         Ok(val) => val,
         Err(e) => {
             println!("Error: {}", e);
             process::exit(0);
         }
     };
-    
+
     for line in lines{
         if let Ok(line) = line{
             println!("{}", line);
