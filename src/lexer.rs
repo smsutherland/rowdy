@@ -1,4 +1,9 @@
 #[derive(Debug)]
+enum DataType{
+    Int,
+}
+
+#[derive(Debug)]
 enum Operator{
     Plus,
     Sub,
@@ -8,15 +13,29 @@ enum Operator{
 }
 
 #[derive(Debug)]
+enum SpecialChar{
+    LParen,
+    RParen,
+    LBrace,
+    RBrace,
+    LBracket,
+    RBracket,
+}
+
+#[derive(Debug)]
 enum TokenType{
     TokenString(String),
     TokenOperator(Operator),
+    TokenDataType(DataType),
+    TokenSpecialChar(SpecialChar),
 }
 
 impl TokenType{
     fn new(token_str: String) -> Self{
         use TokenType::*;
         use Operator::*;
+        use DataType::*;
+        use SpecialChar::*;
 
         match token_str.as_str(){
             "+" => TokenOperator(Plus),
@@ -24,7 +43,17 @@ impl TokenType{
             "=" => TokenOperator(Assign),
             "==" => TokenOperator(Equal),
             ";" => TokenOperator(End),
-            _ => TokenString(token_str)
+
+            "int" => TokenDataType(Int),
+
+            "(" => TokenSpecialChar(LParen),
+            ")" => TokenSpecialChar(RParen),
+            "{" => TokenSpecialChar(LBrace),
+            "}" => TokenSpecialChar(RBrace),
+            "[" => TokenSpecialChar(LBracket),
+            "]" => TokenSpecialChar(RBracket),
+
+            _ => TokenString(token_str),
         }
     }
 }
