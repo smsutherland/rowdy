@@ -1,8 +1,32 @@
-use std::fmt;
+#[derive(Debug)]
+enum Operator{
+    Plus,
+    Sub,
+    Assign,
+    Equal,
+    End,
+}
 
 #[derive(Debug)]
 enum TokenType{
     TokenString(String),
+    TokenOperator(Operator),
+}
+
+impl TokenType{
+    fn new(token_str: String) -> Self{
+        use TokenType::*;
+        use Operator::*;
+
+        match token_str.as_str(){
+            "+" => TokenOperator(Plus),
+            "-" => TokenOperator(Sub),
+            "=" => TokenOperator(Assign),
+            "==" => TokenOperator(Equal),
+            ";" => TokenOperator(End),
+            _ => TokenString(token_str)
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -47,14 +71,16 @@ fn lex_line(line: &str, fname: &str, line_number: usize) -> Vec<Token>{
     let mut tokens = Vec::new();
     let mut i: usize = 1;
     for token in line.split(' '){
-        tokens.push(Token{
-            typ: TokenType::TokenString(String::from(token)),
-            loc: Location{
-                file: String::from(fname),
-                line: line_number,
-                col: i,
-            }
-        });
+        if token.len() > 0{
+            tokens.push(Token{
+                typ: TokenType::new(String::from(token)),
+                loc: Location{
+                    file: String::from(fname),
+                    line: line_number,
+                    col: i,
+                }
+            });
+        }
         i += token.len() + 1;
     }
     tokens
