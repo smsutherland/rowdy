@@ -12,9 +12,9 @@ struct Location{
     col: usize,
 }
 
-impl fmt::Display for Location{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result{
-        write!(f, "{}:{}:{}", self.file, self.line, self.col)
+impl std::string::ToString for Location{
+    fn to_string(&self) -> String{
+        String::from(format!("{}:{}:{}", self.file, self.line, self.col))
     }
 }
 
