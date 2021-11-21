@@ -153,6 +153,7 @@ fn make_multi_token_objects(mut tokens: Vec<Token>) -> Result<Vec<Token>, String
     let mut result: Vec<Token> = Vec::new();
 
     while tokens.len() != 0 {
+        // println!("{:#?}", tokens);
         let slice;
         if  tokens.len() < MAX_MATCH_LEN {
             slice = &tokens[..];
@@ -160,6 +161,7 @@ fn make_multi_token_objects(mut tokens: Vec<Token>) -> Result<Vec<Token>, String
         else{
             slice = &tokens[tokens.len()-MAX_MATCH_LEN..];
         }
+        // println!("{:#?}", slice);
         if let Some((new_token, len)) = matches_function_decl(slice){
             result.push(new_token);
             for _ in 0..len{
@@ -181,9 +183,13 @@ fn make_multi_token_objects(mut tokens: Vec<Token>) -> Result<Vec<Token>, String
     Ok(result)
 }
 
-fn matches_function_decl(tokens: &[Token]) -> Option<(Token, usize)> {
-    if tokens.len() < 3{
+fn matches_function_decl(mut tokens: &[Token]) -> Option<(Token, usize)> {
+    let pattern_len = 3;
+    if tokens.len() < pattern_len{
         return None;
+    }
+    if tokens.len() > pattern_len{
+        tokens = &tokens[tokens.len() - pattern_len..];
     }
 
     use TokenType::*;
@@ -221,9 +227,13 @@ fn matches_function_decl(tokens: &[Token]) -> Option<(Token, usize)> {
     None
 }
 
-fn matches_var_decl(tokens: &[Token]) -> Option<(Token, usize)> {
-    if tokens.len() < 2{
+fn matches_var_decl(mut tokens: &[Token]) -> Option<(Token, usize)> {
+    let pattern_len = 2;
+    if tokens.len() < pattern_len{
         return None;
+    }
+    if tokens.len() > pattern_len{
+        tokens = &tokens[tokens.len() - pattern_len..];
     }
 
     use TokenType::*;
@@ -248,7 +258,7 @@ fn matches_var_decl(tokens: &[Token]) -> Option<(Token, usize)> {
                             name,
                         }
                     ),
-                    loc: tokens[2].loc.clone()
+                    loc: tokens[1].loc.clone()
                 },
                 2
             )
