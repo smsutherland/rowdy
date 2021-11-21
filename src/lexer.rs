@@ -6,7 +6,7 @@ pub struct Token{
     loc: Location,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Location{
     file: String,
     line: usize,
@@ -25,6 +25,21 @@ enum TokenType{
     TokenOperator(Operator),
     TokenDataType(DataType),
     TokenSpecialChar(SpecialChar),
+    TokenFunctionDecl(FunctionDecl),
+    TokenVarDecl(VarDecl),
+}
+
+impl fmt::Display for TokenType{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self{
+            Self::TokenString(_) => write!(f, "string"),
+            Self::TokenOperator(_) => write!(f, "operator"),
+            Self::TokenDataType(_) => write!(f, "data type"),
+            Self::TokenSpecialChar(_) => write!(f, "special char"),
+            Self::TokenFunctionDecl(_) => write!(f, "function declaration"),
+            Self::TokenVarDecl(_) => write!(f, "variable declaration"),
+        }
+    }
 }
 
 impl TokenType{
@@ -55,7 +70,7 @@ impl TokenType{
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum DataType{
     Int,
 }
@@ -78,6 +93,19 @@ enum SpecialChar{
     LBracket,
     RBracket,
 }
+
+#[derive(Debug)]
+struct FunctionDecl{
+    return_type: DataType,
+    name: String,
+}
+
+#[derive(Debug)]
+struct VarDecl{
+    var_type: DataType,
+    name: String,
+}
+
 pub fn lex_file(filename: &String) -> Result<Vec<Token>, String>{
     let lines = match super::read_lines(&filename){
         Ok(val) => val,
@@ -94,7 +122,8 @@ pub fn lex_file(filename: &String) -> Result<Vec<Token>, String>{
             tokens.append(&mut line_tokens);
         }
     }
-    Ok(tokens)
+
+    Ok(make_multi_token_objects(tokens)?)
 }
 
 fn lex_line(line: &str, fname: &str, line_number: usize) -> Vec<Token>{
@@ -114,4 +143,117 @@ fn lex_line(line: &str, fname: &str, line_number: usize) -> Vec<Token>{
         i += token.len() + 1;
     }
     tokens
+}
+
+const MAX_MATCH_LEN: usize = 3;
+
+
+fn make_multi_token_objects(mut tokens: Vec<Token>) -> Result<Vec<Token>, String>{
+    let mut tokens: Vec<Token> = tokens.drain(..).rev().collect();
+    let mut result: Vec<Token> = Vec::new();
+
+    while tokens.len() != 0 {
+        let slice;
+        if  tokens.len() < MAX_MATCH_LEN {
+            slice = &tokens[..];
+        }
+        else{
+            slice = &tokens[tokens.len()-MAX_MATCH_LEN..];
+        }
+        if let Some((new_token, len)) = matches_function_decl(slice){
+            result.push(new_token);
+            for _ in 0..len{
+                tokens.pop();
+            }
+            continue;
+        }
+        if let Some((new_token, len)) = matches_var_decl(slice){
+            result.push(new_token);
+            for _ in 0..len{
+                tokens.pop();
+            }
+            continue;
+        }
+
+        result.push(tokens.pop().unwrap());
+    }
+
+    Ok(result)
+}
+
+fn matches_function_decl(tokens: &[Token]) -> Option<(Token, usize)> {
+    if tokens.len() < 3{
+        return None;
+    }
+
+    use TokenType::*;
+    use SpecialChar::*;
+
+    if matches!(&tokens[2].typ, TokenDataType(_)){
+    if matches!(&tokens[1].typ, TokenString(_)){
+    if matches!(&tokens[0].typ, TokenSpecialChar(c) if matches!(c, LParen)){
+        let return_type = match &tokens[2].typ{
+            TokenDataType(typ) => typ.clone(),
+            _ => unreachable!()
+        };
+
+        let name = match &tokens[1].typ{
+            TokenString(name) => name.clone(),
+            _ => unreachable!()
+        };
+
+        return Some(
+            (
+                Token{
+                    typ: TokenFunctionDecl(
+                        FunctionDecl{
+                            return_type,
+                            name,
+                        }
+                    ),
+                    loc: tokens[2].loc.clone()
+                },
+                2
+            )
+        );
+    }}}
+
+    None
+}
+
+fn matches_var_decl(tokens: &[Token]) -> Option<(Token, usize)> {
+    if tokens.len() < 2{
+        return None;
+    }
+
+    use TokenType::*;
+
+    if matches!(&tokens[1].typ, TokenDataType(_)){
+    if matches!(&tokens[0].typ, TokenString(_)){
+        let var_type = match &tokens[1].typ{
+            TokenDataType(typ) => typ.clone(),
+            _ => unreachable!()
+        };
+
+        let name = match &tokens[0].typ{
+            TokenString(name) => name.clone(),
+            _ => unreachable!()
+        };
+        return Some(
+            (
+                Token{
+                    typ: TokenVarDecl(
+                        VarDecl{
+                            var_type,
+                            name,
+                        }
+                    ),
+                    loc: tokens[2].loc.clone()
+                },
+                2
+            )
+        );
+    }}
+
+    None
 }

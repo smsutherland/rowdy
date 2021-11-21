@@ -32,8 +32,8 @@ pub fn run(config: Config){
 
     let tokens = lexer::lex_file(&config.filename).unwrap();
 
-    for token in &tokens{
-        println!("{:?}", token);
+    for _token in &tokens{
+        println!("{:?}", _token);
     }
     println!("{}", tokens.len());
 }
