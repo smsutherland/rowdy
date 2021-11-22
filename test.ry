@@ -1,3 +1,4 @@
 int main ( int x int y ) {
-
+    int x = 5 ;
+    bingus ( x ) ;
 }
