@@ -45,13 +45,13 @@ impl fmt::Display for TokenType{
 }
 
 impl TokenType{
-    fn new(token_str: String) -> Self{
+    fn new(token_str: &str) -> Self{
         use TokenType::*;
         use Operator::*;
         use DataType::*;
         use SpecialChar::*;
 
-        match token_str.as_str(){
+        match token_str{
             "+" => TokenOperator(Plus),
             "-" => TokenOperator(Sub),
             "=" => TokenOperator(Assign),
@@ -67,7 +67,7 @@ impl TokenType{
             "[" => TokenSpecialChar(LBracket),
             "]" => TokenSpecialChar(RBracket),
 
-            _ => TokenSymbol(token_str),
+            _ => TokenSymbol(String::from(token_str)),
         }
     }
 }
@@ -134,7 +134,7 @@ fn lex_line(line: &str, fname: &str, line_number: usize) -> Vec<Token>{
     for token in line.split(' '){
         if token.len() > 0{
             tokens.push(Token{
-                typ: TokenType::new(String::from(token)),
+                typ: TokenType::new(token),
                 loc: Location{
                     file: String::from(fname),
                     line: line_number,
