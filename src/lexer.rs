@@ -147,38 +147,27 @@ fn lex_line(line: &str, fname: &str, line_number: usize) -> Vec<Token>{
     tokens
 }
 
-const MAX_MATCH_LEN: usize = 3;
-
-
 fn make_multi_token_objects(mut tokens: Vec<Token>) -> Result<Vec<Token>, String>{
     let mut rtokens: Vec<Token> = tokens.drain(..).rev().collect();
     let mut result: Vec<Token> = Vec::new();
 
     while rtokens.len() != 0 {
-        // println!("{:#?}", tokens);
-        let slice;
-        if  rtokens.len() < MAX_MATCH_LEN {
-            slice = &rtokens[..];
-        }
-        else{
-            slice = &rtokens[rtokens.len()-MAX_MATCH_LEN..];
-        }
-        // println!("{:#?}", slice);
-        if let Some((new_token, len)) = matches_function_decl(slice){
+        // println!("{:#?}", rtokens);
+        if let Some((new_token, len)) = matches_function_decl(&rtokens){
             result.push(new_token);
             for _ in 0..len{
                 rtokens.pop();
             }
             continue;
         }
-        if let Some((new_token, len)) = matches_var_decl(slice){
+        if let Some((new_token, len)) = matches_var_decl(&rtokens){
             result.push(new_token);
             for _ in 0..len{
                 rtokens.pop();
             }
             continue;
         }
-        if let Some((new_token, len)) = matches_func_call(slice){
+        if let Some((new_token, len)) = matches_func_call(&rtokens){
             result.push(new_token);
             for _ in 0..len{
                 rtokens.pop();
@@ -198,7 +187,7 @@ fn matches_function_decl(mut tokens: &[Token]) -> Option<(Token, usize)> {
         return None;
     }
     else{
-        tokens = &tokens[tokens.len() - pattern_len..];
+        tokens = &tokens[tokens.len()-pattern_len..];
     }
 
     use TokenType::*;
@@ -242,7 +231,7 @@ fn matches_var_decl(mut tokens: &[Token]) -> Option<(Token, usize)> {
         return None;
     }
     else{
-        tokens = &tokens[tokens.len() - pattern_len..];
+        tokens = &tokens[tokens.len()-pattern_len..];
     }
 
     use TokenType::*;
@@ -283,7 +272,7 @@ fn matches_func_call(mut tokens: &[Token]) -> Option<(Token, usize)> {
         return None;
     }
     else{
-        tokens = &tokens[tokens.len() - pattern_len..];
+        tokens = &tokens[tokens.len()-pattern_len..];
     }
 
     use TokenType::*;
