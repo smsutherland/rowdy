@@ -4,6 +4,7 @@ use std::fs::File;
 use std::path::Path;
 
 mod lexer;
+mod token;
 
 #[derive(Debug)]
 pub struct Config{
