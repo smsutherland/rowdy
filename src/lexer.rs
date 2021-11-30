@@ -70,109 +70,73 @@ fn make_multi_token_objects(mut tokens: Vec<Token>) -> Result<Vec<Token>, String
     Ok(result)
 }
 
-fn matches_function_decl(mut tokens: &[Token]) -> Option<(Token, usize)> {
+fn matches_function_decl(mut rtokens: &[Token]) -> Option<(Token, usize)> {
     let pattern_len = 3;
-    if tokens.len() < pattern_len{
+    if rtokens.len() < pattern_len{
         return None;
     }
     else{
-        tokens = &tokens[tokens.len()-pattern_len..];
+        rtokens = &rtokens[rtokens.len()-pattern_len..];
     }
 
     use TokenType::*;
     use SpecialChar::*;
 
-    if matches!(&tokens[2].typ(), TokenDataType(_)){
-    if matches!(&tokens[1].typ(), TokenSymbol(_)){
-    if matches!(&tokens[0].typ(), TokenSpecialChar(c) if matches!(c, LParen)){
-        let return_type = match &tokens[2].typ(){
-            TokenDataType(typ) => typ.clone(),
-            _ => unreachable!()
-        };
-
-        let name = match &tokens[1].typ(){
-            TokenSymbol(name) => name.clone(),
-            _ => unreachable!()
-        };
-
-        return Some(
-            (
-                Token::new(
-                    TokenType::new_func_decl(return_type, name),
-                    tokens[2].loc().clone()
-                ),
-                2
-            )
-        );
-    }}}
-
+    if let [Token {typ: TokenSpecialChar(LParen), ..}, Token{typ: TokenSymbol(name), ..}, Token{typ: TokenDataType(return_type), loc}] = rtokens{
+        return Some((
+            Token::new(
+                TokenType::new_func_decl(return_type.to_owned(), name.to_owned()),
+                loc.to_owned()
+            ),
+            2
+        ));
+    }
     None
 }
 
-fn matches_var_decl(mut tokens: &[Token]) -> Option<(Token, usize)> {
+fn matches_var_decl(mut rtokens: &[Token]) -> Option<(Token, usize)> {
     let pattern_len = 2;
-    if tokens.len() < pattern_len{
+    if rtokens.len() < pattern_len{
         return None;
     }
     else{
-        tokens = &tokens[tokens.len()-pattern_len..];
+        rtokens = &rtokens[rtokens.len()-pattern_len..];
     }
 
     use TokenType::*;
 
-    if matches!(&tokens[1].typ(), TokenDataType(_)){
-    if matches!(&tokens[0].typ(), TokenSymbol(_)){
-        let var_type = match &tokens[1].typ(){
-            TokenDataType(typ) => typ.clone(),
-            _ => unreachable!()
-        };
-
-        let name = match &tokens[0].typ(){
-            TokenSymbol(name) => name.clone(),
-            _ => unreachable!()
-        };
-        return Some(
-            (
+    if let [Token{typ: TokenSymbol(name), ..}, Token{typ: TokenDataType(var_type), loc}] = rtokens{
+        return Some((
                 Token::new(
-                    TokenType::new_var_decl(var_type, name),
-                    tokens[1].loc().clone()
+                    TokenType::new_var_decl(var_type.to_owned(), name.to_owned()),
+                    loc.to_owned()
                 ),
                 2
-            )
-        );
-    }}
-
+            ));
+    }
     None
 }
 
-fn matches_func_call(mut tokens: &[Token]) -> Option<(Token, usize)> {
+fn matches_func_call(mut rtokens: &[Token]) -> Option<(Token, usize)> {
     let pattern_len = 2;
-    if tokens.len() < pattern_len{
+    if rtokens.len() < pattern_len{
         return None;
     }
     else{
-        tokens = &tokens[tokens.len()-pattern_len..];
+        rtokens = &rtokens[rtokens.len()-pattern_len..];
     }
 
     use TokenType::*;
     use SpecialChar::*;
 
-    if matches!(&tokens[1].typ(), TokenSymbol(_)){
-    if matches!(&tokens[0].typ(), TokenSpecialChar(c) if matches!(c, LParen)){
-        let name = match &tokens[1].typ(){
-            TokenSymbol(name) => name.clone(),
-            _ => unreachable!()
-        };
-        return Some(
-            (
-                Token::new(
-                    TokenType::TokenFuncCall(name),
-                    tokens[1].loc().clone()
-                ),
-                1
-            )
-        );
-    }}
-
+    if let [Token{typ: TokenSpecialChar(LParen), ..}, Token{typ: TokenSymbol(name), loc}] = rtokens{
+        return Some((
+            Token::new(
+                TokenType::TokenFuncCall(name.to_owned()),
+                loc.to_owned()
+            ),
+            1
+        ));
+    }
     None
 }

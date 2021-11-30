@@ -2,8 +2,8 @@ use std::fmt;
 
 #[derive(Debug)]
 pub struct Token{
-    typ: TokenType,
-    loc: Location,
+    pub typ: TokenType,
+    pub loc: Location,
 }
 
 impl Token{
@@ -12,14 +12,6 @@ impl Token{
             typ,
             loc,
         }
-    }
-
-    pub fn typ(&self) -> &TokenType{
-        &self.typ
-    }
-
-    pub fn loc(&self) -> &Location{
-        &self.loc
     }
 }
 
