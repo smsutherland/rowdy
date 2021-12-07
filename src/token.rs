@@ -1,41 +1,38 @@
 use std::fmt;
 
 #[derive(Debug)]
-pub struct Token{
+pub struct Token {
     pub typ: TokenType,
     pub loc: Location,
 }
 
-impl Token{
-    pub fn new(typ: TokenType, loc: Location) -> Token{
-        Token{
-            typ,
-            loc,
-        }
+impl Token {
+    pub fn new(typ: TokenType, loc: Location) -> Token {
+        Token { typ, loc }
     }
 }
 
 #[derive(Clone)]
-pub struct Location{
+pub struct Location {
     pub file: String,
     pub line: usize,
     pub col: usize,
 }
 
-impl fmt::Display for Location{
+impl fmt::Display for Location {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}:{}:{}", self.file, self.line, self.col)
     }
 }
 
-impl fmt::Debug for Location{
+impl fmt::Debug for Location {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self)
     }
 }
 
 #[derive(Debug)]
-pub enum TokenType{
+pub enum TokenType {
     TokenSymbol(String),
     TokenOperator(Operator),
     TokenDataType(DataType),
@@ -45,29 +42,19 @@ pub enum TokenType{
     TokenFuncCall(String),
 }
 
-impl TokenType{
-    pub fn new_func_decl(return_type: DataType, name: String) -> TokenType{
-        TokenType::TokenFuncDecl(
-            FunctionDecl{
-                return_type,
-                name,
-            }
-        )
+impl TokenType {
+    pub fn new_func_decl(return_type: DataType, name: String) -> TokenType {
+        TokenType::TokenFuncDecl(FunctionDecl { return_type, name })
     }
 
-    pub fn new_var_decl(var_type: DataType, name: String) -> TokenType{
-        TokenType::TokenVarDecl(
-            VarDecl{
-                var_type,
-                name,
-            }
-        )
+    pub fn new_var_decl(var_type: DataType, name: String) -> TokenType {
+        TokenType::TokenVarDecl(VarDecl { var_type, name })
     }
 }
 
-impl fmt::Display for TokenType{
+impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self{
+        match self {
             Self::TokenSymbol(_) => write!(f, "symbol"),
             Self::TokenOperator(_) => write!(f, "operator"),
             Self::TokenDataType(_) => write!(f, "data type"),
@@ -79,14 +66,14 @@ impl fmt::Display for TokenType{
     }
 }
 
-impl TokenType{
-    pub fn from_string(token_str: &str) -> Self{
-        use TokenType::*;
-        use Operator::*;
+impl TokenType {
+    pub fn from_string(token_str: &str) -> Self {
         use DataType::*;
+        use Operator::*;
         use SpecialChar::*;
+        use TokenType::*;
 
-        match token_str{
+        match token_str {
             "+" => TokenOperator(Plus),
             "-" => TokenOperator(Sub),
             "=" => TokenOperator(Assign),
@@ -108,12 +95,12 @@ impl TokenType{
 }
 
 #[derive(Debug, Clone)]
-pub enum DataType{
+pub enum DataType {
     Int,
 }
 
 #[derive(Debug)]
-pub enum Operator{
+pub enum Operator {
     Plus,
     Sub,
     Assign,
@@ -122,7 +109,7 @@ pub enum Operator{
 }
 
 #[derive(Debug)]
-pub enum SpecialChar{
+pub enum SpecialChar {
     LParen,
     RParen,
     LBrace,
@@ -132,13 +119,13 @@ pub enum SpecialChar{
 }
 
 #[derive(Debug)]
-pub struct FunctionDecl{
+pub struct FunctionDecl {
     return_type: DataType,
     name: String,
 }
 
 #[derive(Debug)]
-pub struct VarDecl{
+pub struct VarDecl {
     var_type: DataType,
     name: String,
 }
