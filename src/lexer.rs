@@ -17,7 +17,11 @@ pub fn lex_file(filename: &String) -> Result<Vec<Token>, String> {
         }
     }
 
-    Ok(make_multi_token_objects(tokens)?)
+    tokens = make_multi_token_objects(tokens)?;
+    tokens = crossreference_pairs(tokens)?;
+    // println!("{:?}", tokens);
+
+    Ok(tokens)
 }
 
 fn lex_line(line: &str, fname: &str, line_number: usize) -> Vec<Token> {
@@ -39,12 +43,74 @@ fn lex_line(line: &str, fname: &str, line_number: usize) -> Vec<Token> {
     tokens
 }
 
+fn crossreference_pairs(mut tokens: Vec<Token>) -> Result<Vec<Token>, String> {
+    use SpecialChar::*;
+    use TokenType::*;
+
+    let mut result: Vec<Token> = Vec::new();
+
+    let mut token_stack: Vec<usize> = Vec::new();
+    for (i, mut token) in tokens.drain(..).enumerate() {
+        match token.typ {
+            TokenSpecialChar(LParen(_))
+            | TokenSpecialChar(LBrace(_))
+            | TokenSpecialChar(LBracket(_)) => {
+                token_stack.push(i);
+            },
+            TokenSpecialChar(RParen(_)) => {
+                if token_stack.last().map_or(false, |x| {
+                    matches!(result[*x].typ, TokenSpecialChar(LParen(_)))
+                }) {
+                    let x = token_stack.pop().unwrap();
+                    let matched_token = &mut result[x];
+                    matched_token.typ = TokenSpecialChar(LParen(Some(i)));
+                    token.typ = TokenSpecialChar(RParen(Some(x)));
+                }
+                else{
+                    return Err(String::from("unmatched right pair"));
+                }
+            },
+            TokenSpecialChar(RBrace(_)) => {
+                if token_stack.last().map_or(false, |x| {
+                    matches!(result[*x].typ, TokenSpecialChar(LBrace(_)))
+                }) {
+                    let x = token_stack.pop().unwrap();
+                    let matched_token = &mut result[x];
+                    matched_token.typ = TokenSpecialChar(LBrace(Some(i)));
+                    token.typ = TokenSpecialChar(RBrace(Some(x)));
+                }
+                else{
+                    return Err(String::from("unmatched right pair"));
+                }
+            },
+            TokenSpecialChar(RBracket(_)) => {
+                if token_stack.last().map_or(false, |x| {
+                    matches!(result[*x].typ, TokenSpecialChar(LBracket(_)))
+                }) {
+                    let x = token_stack.pop().unwrap();
+                    let matched_token = &mut result[x];
+                    matched_token.typ = TokenSpecialChar(LBracket(Some(i)));
+                    token.typ = TokenSpecialChar(RBracket(Some(x)));
+                }
+                else{
+                    return Err(String::from("unmatched right pair"));
+                }
+            },
+            _ => (),
+        }
+        result.push(token);
+    }
+    if token_stack.len() > 0{
+        return Err(String::from("unmatched left pair"));
+    }
+    Ok(result)
+}
+
 fn make_multi_token_objects(mut tokens: Vec<Token>) -> Result<Vec<Token>, String> {
     let mut rtokens: Vec<Token> = tokens.drain(..).rev().collect();
     let mut result: Vec<Token> = Vec::new();
 
     while rtokens.len() != 0 {
-        // println!("{:#?}", rtokens);
         if let Some((new_token, len)) = matches_function_decl(&rtokens) {
             result.push(new_token);
             for _ in 0..len {
@@ -85,7 +151,7 @@ fn matches_function_decl(mut rtokens: &[Token]) -> Option<(Token, usize)> {
     use TokenType::*;
 
     if let [Token {
-        typ: TokenSpecialChar(LParen),
+        typ: TokenSpecialChar(LParen(_)),
         ..
     }, Token {
         typ: TokenSymbol(name),
@@ -147,7 +213,7 @@ fn matches_func_call(mut rtokens: &[Token]) -> Option<(Token, usize)> {
     use TokenType::*;
 
     if let [Token {
-        typ: TokenSpecialChar(LParen),
+        typ: TokenSpecialChar(LParen(_)),
         ..
     }, Token {
         typ: TokenSymbol(name),

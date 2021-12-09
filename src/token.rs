@@ -50,23 +50,7 @@ impl TokenType {
     pub fn new_var_decl(var_type: DataType, name: String) -> TokenType {
         TokenType::TokenVarDecl(VarDecl { var_type, name })
     }
-}
 
-impl fmt::Display for TokenType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::TokenSymbol(_) => write!(f, "symbol"),
-            Self::TokenOperator(_) => write!(f, "operator"),
-            Self::TokenDataType(_) => write!(f, "data type"),
-            Self::TokenSpecialChar(_) => write!(f, "special char"),
-            Self::TokenFuncDecl(_) => write!(f, "function declaration"),
-            Self::TokenVarDecl(_) => write!(f, "variable declaration"),
-            Self::TokenFuncCall(_) => write!(f, "function call"),
-        }
-    }
-}
-
-impl TokenType {
     pub fn from_string(token_str: &str) -> Self {
         use DataType::*;
         use Operator::*;
@@ -82,14 +66,28 @@ impl TokenType {
 
             "int" => TokenDataType(Int),
 
-            "(" => TokenSpecialChar(LParen),
-            ")" => TokenSpecialChar(RParen),
-            "{" => TokenSpecialChar(LBrace),
-            "}" => TokenSpecialChar(RBrace),
-            "[" => TokenSpecialChar(LBracket),
-            "]" => TokenSpecialChar(RBracket),
+            "(" => TokenSpecialChar(LParen(None)),
+            ")" => TokenSpecialChar(RParen(None)),
+            "{" => TokenSpecialChar(LBrace(None)),
+            "}" => TokenSpecialChar(RBrace(None)),
+            "[" => TokenSpecialChar(LBracket(None)),
+            "]" => TokenSpecialChar(RBracket(None)),
 
             _ => TokenSymbol(String::from(token_str)),
+        }
+    }
+}
+
+impl fmt::Display for TokenType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::TokenSymbol(_) => write!(f, "symbol"),
+            Self::TokenOperator(_) => write!(f, "operator"),
+            Self::TokenDataType(_) => write!(f, "data type"),
+            Self::TokenSpecialChar(_) => write!(f, "special char"),
+            Self::TokenFuncDecl(_) => write!(f, "function declaration"),
+            Self::TokenVarDecl(_) => write!(f, "variable declaration"),
+            Self::TokenFuncCall(_) => write!(f, "function call"),
         }
     }
 }
@@ -110,12 +108,12 @@ pub enum Operator {
 
 #[derive(Debug)]
 pub enum SpecialChar {
-    LParen,
-    RParen,
-    LBrace,
-    RBrace,
-    LBracket,
-    RBracket,
+    LParen(Option<usize>),
+    RParen(Option<usize>),
+    LBrace(Option<usize>),
+    RBrace(Option<usize>),
+    LBracket(Option<usize>),
+    RBracket(Option<usize>),
 }
 
 #[derive(Debug)]

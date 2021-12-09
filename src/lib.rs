@@ -34,8 +34,8 @@ where
 pub fn run(config: Config) {
     let tokens = lexer::lex_file(&config.filename).unwrap();
 
-    for _token in &tokens {
-        println!("{:?}", _token);
+    for (i, token) in tokens.iter().enumerate() {
+        println!("{}: {:?}", i, token);
     }
     println!("{}", tokens.len());
 }
