@@ -5,14 +5,14 @@ pub fn compile_tokens(tokens: &Vec<Token>) {
     // let entry = find_entry(&tokens).unwrap();
     // println!("starting at token {}", entry);
 
-    let mut functions: HashMap<FunctionDefinition, Vec<Token>> = HashMap::new();
+    let mut functions: HashMap<FunctionSignature, Vec<Token>> = HashMap::new();
 
     let mut i = 0;
     while i < tokens.len(){
         if let token::TokenType::TokenFuncDecl(token::FunctionDecl{return_type, name}) = &tokens[i].typ{
             i += 1;
             debug_assert!(matches!(tokens[i].typ, token::TokenType::TokenSpecialChar(token::SpecialChar::LParen(_))));
-            let mut func_def = FunctionDefinition{
+            let mut func_def = FunctionSignature{
                 return_type: *return_type,
                 name: String::from(name),
                 parameters: Vec::new(),
@@ -43,7 +43,7 @@ pub fn compile_tokens(tokens: &Vec<Token>) {
 }
 
 #[derive(PartialEq, Eq, Hash, Debug)]
-struct FunctionDefinition{
+struct FunctionSignature{
     return_type: DataType,
     name: String,
     parameters: Vec<(DataType, String)>,
