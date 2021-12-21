@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Token {
     pub typ: TokenType,
     pub loc: Location,
@@ -9,6 +9,15 @@ pub struct Token {
 impl Token {
     pub fn new(typ: TokenType, loc: Location) -> Token {
         Token { typ, loc }
+    }
+
+    pub fn is_entry(&self) -> bool{
+        if let TokenType::TokenFuncDecl(FunctionDecl{name, ..}) = &self.typ{
+            if name == "main"{
+                return true;
+            }
+        }
+        false
     }
 }
 
@@ -20,18 +29,18 @@ pub struct Location {
 }
 
 impl fmt::Display for Location {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}:{}:{}", self.file, self.line, self.col)
     }
 }
 
 impl fmt::Debug for Location {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self)
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum TokenType {
     TokenSymbol(String),
     TokenOperator(Operator),
@@ -92,12 +101,12 @@ impl fmt::Display for TokenType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum DataType {
     Int,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Operator {
     Plus,
     Sub,
@@ -106,7 +115,7 @@ pub enum Operator {
     End,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum SpecialChar {
     LParen(Option<usize>),
     RParen(Option<usize>),
@@ -116,14 +125,14 @@ pub enum SpecialChar {
     RBracket(Option<usize>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct FunctionDecl {
-    return_type: DataType,
-    name: String,
+    pub return_type: DataType,
+    pub name: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VarDecl {
-    var_type: DataType,
-    name: String,
+    pub var_type: DataType,
+    pub name: String,
 }

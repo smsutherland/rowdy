@@ -1,7 +1,10 @@
 int main ( int x int y ) {
-    int x = 5 ;
-    bingus ( x ) ;
-    {
-        ( )
-    }
+    int x ;
+    x = 5 ;
+    println ( x ) ;
+}
+
+int bingus ( ) {
+    abc ( ) ;
+    1 2 3 ;
 }

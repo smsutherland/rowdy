@@ -56,7 +56,7 @@ fn crossreference_pairs(mut tokens: Vec<Token>) -> Result<Vec<Token>, String> {
             | TokenSpecialChar(LBrace(_))
             | TokenSpecialChar(LBracket(_)) => {
                 token_stack.push(i);
-            },
+            }
             TokenSpecialChar(RParen(_)) => {
                 if token_stack.last().map_or(false, |x| {
                     matches!(result[*x].typ, TokenSpecialChar(LParen(_)))
@@ -65,11 +65,10 @@ fn crossreference_pairs(mut tokens: Vec<Token>) -> Result<Vec<Token>, String> {
                     let matched_token = &mut result[x];
                     matched_token.typ = TokenSpecialChar(LParen(Some(i)));
                     token.typ = TokenSpecialChar(RParen(Some(x)));
-                }
-                else{
+                } else {
                     return Err(String::from("unmatched right pair"));
                 }
-            },
+            }
             TokenSpecialChar(RBrace(_)) => {
                 if token_stack.last().map_or(false, |x| {
                     matches!(result[*x].typ, TokenSpecialChar(LBrace(_)))
@@ -78,11 +77,10 @@ fn crossreference_pairs(mut tokens: Vec<Token>) -> Result<Vec<Token>, String> {
                     let matched_token = &mut result[x];
                     matched_token.typ = TokenSpecialChar(LBrace(Some(i)));
                     token.typ = TokenSpecialChar(RBrace(Some(x)));
-                }
-                else{
+                } else {
                     return Err(String::from("unmatched right pair"));
                 }
-            },
+            }
             TokenSpecialChar(RBracket(_)) => {
                 if token_stack.last().map_or(false, |x| {
                     matches!(result[*x].typ, TokenSpecialChar(LBracket(_)))
@@ -91,16 +89,15 @@ fn crossreference_pairs(mut tokens: Vec<Token>) -> Result<Vec<Token>, String> {
                     let matched_token = &mut result[x];
                     matched_token.typ = TokenSpecialChar(LBracket(Some(i)));
                     token.typ = TokenSpecialChar(RBracket(Some(x)));
-                }
-                else{
+                } else {
                     return Err(String::from("unmatched right pair"));
                 }
-            },
+            }
             _ => (),
         }
         result.push(token);
     }
-    if token_stack.len() > 0{
+    if token_stack.len() > 0 {
         return Err(String::from("unmatched left pair"));
     }
     Ok(result)
