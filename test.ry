@@ -1,4 +1,4 @@
-int main ( int x int y ) {
+int main ( ) {
     int x ;
     x = 5 ;
     println ( x ) ;
