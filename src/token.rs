@@ -11,9 +11,9 @@ impl Token {
         Token { typ, loc }
     }
 
-    pub fn is_entry(&self) -> bool{
-        if let TokenType::TokenFuncDecl(FunctionDecl{name, ..}) = &self.typ{
-            if name == "main"{
+    pub fn is_entry(&self) -> bool {
+        if let TokenType::TokenFuncDecl(FunctionDecl { name, .. }) = &self.typ {
+            if name == "main" {
                 return true;
             }
         }

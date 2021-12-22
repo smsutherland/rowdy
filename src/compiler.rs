@@ -5,13 +5,16 @@ type FunctionMap = HashMap<FunctionSignature, Vec<Token>>;
 pub fn compile_tokens(tokens: &Vec<Token>) {
     let functions = make_functions(tokens);
 
-    let main_signature: FunctionSignature = FunctionSignature{
+    let main_signature: FunctionSignature = FunctionSignature {
         return_type: DataType::Int,
         name: String::from("main"),
         parameters: Vec::new(),
     };
-    
-    assert!(functions.contains_key(&main_signature), "program needs main function");
+
+    assert!(
+        functions.contains_key(&main_signature),
+        "program needs main function"
+    );
 
     println!("{:#?}", functions);
 }
