@@ -7,9 +7,7 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-mod compiler;
 mod lexer;
-mod token;
 
 #[derive(Debug)]
 pub struct Config {
@@ -39,10 +37,8 @@ where
 pub fn run(config: Config) {
     let tokens = lexer::lex_file(&config.filename).unwrap();
 
-    compiler::compile_tokens(&tokens);
-
     for (i, token) in tokens.iter().enumerate() {
-        // println!("{}: {:?}", i, token);
+        println!("{}: {:?}", i, token);
     }
-    // println!("{}", tokens.len());
+    println!("{}", tokens.len());
 }

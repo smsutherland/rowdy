@@ -1,10 +1,3 @@
-int main ( ) {
-    int x ;
-    x = 5 ;
-    println ( x ) ;
-}
-
-int bingus ( ) {
-    abc ( ) ;
-    1 2 3 ;
+int main() {
+    int x;
 }
