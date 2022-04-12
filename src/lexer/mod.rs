@@ -5,6 +5,7 @@ use token::*;
 enum LexState {
     Start,
     Symbol,
+    Integer,
 }
 
 impl LexState {
@@ -12,16 +13,16 @@ impl LexState {
         match self {
             Self::Start => state_start(c, lit_val),
             Self::Symbol => state_symbol(c, lit_val),
+            Self::Integer => state_integer(c, lit_val),
         }
     }
 }
 
-struct StateResult {
-    next_state: LexState,
-    next_token: Option<TokenType>,
-    next_substr: String,
-    go_back: bool,
+enum StateResult {
+    IncompleteToken(LexState, String),
+    CompleteToken(TokenType, bool),
 }
+use StateResult::*;
 
 pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
     let lines = match super::read_lines(&filename) {
@@ -41,7 +42,9 @@ pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
     for (line_num, line) in lines.enumerate() {
         if let Ok(line) = line {
             for (col_num, c) in line.chars().enumerate() {
-                loop {
+                let mut continue_loop = true;
+                while continue_loop {
+                    continue_loop = false;
                     if state == LexState::Start {
                         token_start = Location {
                             file: filename,
@@ -49,18 +52,21 @@ pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
                             col: col_num + 1,   // col numbers are 1-indexed
                         };
                     }
-                    let call_result = state.call(c, current_substr);
-                    current_substr = call_result.next_substr;
-                    state = call_result.next_state;
-                    if let Some(next_token) = call_result.next_token {
-                        tokens.push(Token {
-                            typ: next_token,
-                            loc: token_start,
-                        });
-                    }
-                    if !call_result.go_back {
-                        break;
-                    }
+                    match state.call(c, current_substr) {
+                        IncompleteToken(next_state, next_substr) => {
+                            state = next_state;
+                            current_substr = next_substr;
+                        }
+                        CompleteToken(next_token, go_back) => {
+                            state = LexState::Start;
+                            current_substr = String::new();
+                            tokens.push(Token {
+                                typ: next_token,
+                                loc: token_start,
+                            });
+                            continue_loop = go_back;
+                        }
+                    };
                 }
             }
         } else {
@@ -83,12 +89,6 @@ macro_rules! whitespace {
     };
 }
 
-macro_rules! digit_nonzero {
-    () => {
-        '1'..='9'
-    };
-}
-
 macro_rules! digit {
     () => {
         '0'..='9'
@@ -96,68 +96,18 @@ macro_rules! digit {
 }
 
 fn state_start(c: char, lit_val: String) -> StateResult {
-    use token::TokenType::*;
     match c {
-        ';' => StateResult {
-            next_state: LexState::Start,
-            next_token: Some(TokenEnd),
-            next_substr: String::new(),
-            go_back: false,
-        },
-        '(' => StateResult {
-            next_state: LexState::Start,
-            next_token: Some(TokenSpecialChar(SpecialChar::LParen(None))),
-            next_substr: String::new(),
-            go_back: false,
-        },
-        ')' => StateResult {
-            next_state: LexState::Start,
-            next_token: Some(TokenSpecialChar(SpecialChar::RParen(None))),
-            next_substr: String::new(),
-            go_back: false,
-        },
-        '[' => StateResult {
-            next_state: LexState::Start,
-            next_token: Some(TokenSpecialChar(SpecialChar::LBracket(None))),
-            next_substr: String::new(),
-            go_back: false,
-        },
-        ']' => StateResult {
-            next_state: LexState::Start,
-            next_token: Some(TokenSpecialChar(SpecialChar::RBracket(None))),
-            next_substr: String::new(),
-            go_back: false,
-        },
-        '}' => StateResult {
-            next_state: LexState::Start,
-            next_token: Some(TokenSpecialChar(SpecialChar::LBrace(None))),
-            next_substr: String::new(),
-            go_back: false,
-        },
-        '{' => StateResult {
-            next_state: LexState::Start,
-            next_token: Some(TokenSpecialChar(SpecialChar::RBrace(None))),
-            next_substr: String::new(),
-            go_back: false,
-        },
-        '=' => StateResult {
-            next_state: LexState::Start,
-            next_token: Some(TokenOperator(Operator::Assign)),
-            next_substr: String::new(),
-            go_back: false,
-        },
-        symbol_start!() => StateResult {
-            next_state: LexState::Symbol,
-            next_token: None,
-            next_substr: String::from(c),
-            go_back: false,
-        },
-        whitespace!() => StateResult {
-            next_state: LexState::Start,
-            next_token: None,
-            next_substr: String::new(),
-            go_back: false,
-        },
+        ';' => CompleteToken(TokenType::End, false),
+        '(' => CompleteToken(TokenType::SpecialChar(SpecialChar::LParen(None)), false),
+        ')' => CompleteToken(TokenType::SpecialChar(SpecialChar::RParen(None)), false),
+        '[' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBracket(None)), false),
+        ']' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBracket(None)), false),
+        '}' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBrace(None)), false),
+        '{' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBrace(None)), false),
+        '=' => CompleteToken(TokenType::Operator(Operator::Assign), false),
+        symbol_start!() => IncompleteToken(LexState::Symbol, String::from(c)),
+        whitespace!() => IncompleteToken(LexState::Start, String::new()),
+        digit!() => IncompleteToken(LexState::Integer, String::from(c)),
         _ => {
             panic!("unrecognized character '{c}'");
         }
@@ -166,27 +116,33 @@ fn state_start(c: char, lit_val: String) -> StateResult {
 
 macro_rules! symbol_mid {
     () => {
-        symbol_start!() | '0'..='9'
+        symbol_start!() | digit!()
     };
 }
 
-fn state_symbol<'a>(c: char, mut lit_val: String) -> StateResult {
-    use token::TokenType::*;
+fn state_symbol(c: char, mut lit_val: String) -> StateResult {
     match c {
         symbol_mid!() => {
             lit_val.push(c);
-            StateResult {
-                next_state: LexState::Symbol,
-                next_token: None,
-                next_substr: lit_val,
-                go_back: false,
-            }
+            IncompleteToken(LexState::Symbol, lit_val)
         }
-        _ => StateResult {
-            next_state: LexState::Start,
-            next_token: Some(TokenSymbol(lit_val)),
-            next_substr: String::new(),
-            go_back: true,
-        },
+        _ => CompleteToken(
+            match lit_val.as_str() {
+                "int" => TokenType::DataType(DataType::Int),
+                _ => TokenType::Symbol(lit_val),
+            },
+            true,
+        ),
+    }
+}
+
+fn state_integer(c: char, mut lit_val: String) -> StateResult {
+    use token::TokenType::*;
+    match c {
+        digit!() => {
+            lit_val.push(c);
+            IncompleteToken(LexState::Integer, lit_val)
+        }
+        _ => CompleteToken(IntLit(lit_val.parse().unwrap()), true),
     }
 }

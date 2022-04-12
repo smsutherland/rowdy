@@ -27,49 +27,23 @@ impl fmt::Debug for Location<'_> {
 
 #[derive(Debug, Clone)]
 pub enum TokenType {
-    TokenSymbol(String),
-    TokenOperator(Operator),
-    TokenDataType(DataType),
-    TokenSpecialChar(SpecialChar),
-    TokenEnd,
-}
-
-impl TokenType {
-    pub fn from_string(token_str: &str) -> Self {
-        use DataType::*;
-        use Operator::*;
-        use SpecialChar::*;
-        use TokenType::*;
-
-        match token_str {
-            "+" => TokenOperator(Plus),
-            "-" => TokenOperator(Sub),
-            "=" => TokenOperator(Assign),
-            "==" => TokenOperator(Equal),
-            ";" => TokenEnd,
-
-            "int" => TokenDataType(Int),
-
-            "(" => TokenSpecialChar(LParen(None)),
-            ")" => TokenSpecialChar(RParen(None)),
-            "{" => TokenSpecialChar(LBrace(None)),
-            "}" => TokenSpecialChar(RBrace(None)),
-            "[" => TokenSpecialChar(LBracket(None)),
-            "]" => TokenSpecialChar(RBracket(None)),
-
-            _ => TokenSymbol(String::from(token_str)),
-        }
-    }
+    Symbol(String),
+    Operator(Operator),
+    DataType(DataType),
+    SpecialChar(SpecialChar),
+    IntLit(i32), // TODO: Do we need to increase this to i64?
+    End,
 }
 
 impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::TokenSymbol(_) => write!(f, "symbol"),
-            Self::TokenOperator(_) => write!(f, "operator"),
-            Self::TokenDataType(_) => write!(f, "data type"),
-            Self::TokenSpecialChar(_) => write!(f, "special char"),
-            Self::TokenEnd => write!(f, "end"),
+            Self::Symbol(_) => write!(f, "symbol"),
+            Self::Operator(_) => write!(f, "operator"),
+            Self::DataType(_) => write!(f, "data type"),
+            Self::SpecialChar(_) => write!(f, "special char"),
+            Self::End => write!(f, "end"),
+            Self::IntLit(_) => write!(f, "int lit"),
         }
     }
 }
