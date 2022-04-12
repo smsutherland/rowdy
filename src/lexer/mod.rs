@@ -98,12 +98,12 @@ macro_rules! digit {
 fn state_start(c: char, lit_val: String) -> StateResult {
     match c {
         ';' => CompleteToken(TokenType::End, false),
-        '(' => CompleteToken(TokenType::SpecialChar(SpecialChar::LParen(None)), false),
-        ')' => CompleteToken(TokenType::SpecialChar(SpecialChar::RParen(None)), false),
-        '[' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBracket(None)), false),
-        ']' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBracket(None)), false),
-        '}' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBrace(None)), false),
-        '{' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBrace(None)), false),
+        '(' => CompleteToken(TokenType::SpecialChar(SpecialChar::LParen), false),
+        ')' => CompleteToken(TokenType::SpecialChar(SpecialChar::RParen), false),
+        '[' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBracket), false),
+        ']' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBracket), false),
+        '}' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBrace), false),
+        '{' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBrace), false),
         '=' => CompleteToken(TokenType::Operator(Operator::Assign), false),
         symbol_start!() => IncompleteToken(LexState::Symbol, String::from(c)),
         whitespace!() => IncompleteToken(LexState::Start, String::new()),

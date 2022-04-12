@@ -63,10 +63,10 @@ pub enum Operator {
 
 #[derive(Debug, Clone)]
 pub enum SpecialChar {
-    LParen(Option<usize>),
-    RParen(Option<usize>),
-    LBrace(Option<usize>),
-    RBrace(Option<usize>),
-    LBracket(Option<usize>),
-    RBracket(Option<usize>),
+    LParen,
+    RParen,
+    LBrace,
+    RBrace,
+    LBracket,
+    RBracket,
 }
