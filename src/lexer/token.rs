@@ -47,6 +47,7 @@ pub enum TokenType {
     SpecialChar(SpecialChar),
     IntLit(i32), // TODO: Do we need to increase this to i64? Have multiple IntLit types?
     FloatLit(f32),
+    Keyword(Keyword),
     End,
     Eof,
 }
@@ -60,6 +61,7 @@ impl fmt::Display for TokenType {
             Self::SpecialChar(_) => write!(f, "special char"),
             Self::IntLit(_) => write!(f, "int lit"),
             Self::FloatLit(_) => write!(f, "float lit"),
+            Self::Keyword(_) => write!(f, "keyword"),
             Self::End => write!(f, "end"),
             Self::Eof => write!(f, "eof"),
         }
@@ -86,4 +88,14 @@ pub enum SpecialChar {
     RBrace,
     LBracket,
     RBracket,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Keyword {
+    If,
+    Else,
+    While,
+    For,
+    Return,
+    Yield,
 }
