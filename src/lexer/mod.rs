@@ -1,4 +1,5 @@
 pub mod token;
+use crate::types::Type;
 use token::*;
 
 #[derive(PartialEq, Eq)]
@@ -6,6 +7,9 @@ enum LexState {
     Start,
     Symbol,
     Integer,
+    Equals,
+    Plus,
+    Minus,
 }
 
 impl LexState {
@@ -14,6 +18,9 @@ impl LexState {
             Self::Start => state_start(c),
             Self::Symbol => state_symbol(c, lit_val),
             Self::Integer => state_integer(c, lit_val),
+            Self::Equals => state_equals(c),
+            Self::Plus => state_plus(c),
+            Self::Minus => state_minus(c),
         }
     }
 }
@@ -23,8 +30,6 @@ enum StateResult {
     CompleteToken(TokenType, bool),
 }
 use StateResult::*;
-
-use crate::types::Type;
 
 pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
     let lines = match super::read_lines(filename) {
@@ -110,7 +115,9 @@ fn state_start(c: char) -> StateResult {
         ']' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBracket), false),
         '{' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBrace), false),
         '}' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBrace), false),
-        '=' => CompleteToken(TokenType::Operator(Operator::Assign), false),
+        '=' => IncompleteToken(LexState::Equals, String::from(c)),
+        '+' => IncompleteToken(LexState::Plus, String::from(c)),
+        '-' => IncompleteToken(LexState::Minus, String::from(c)),
         symbol_start!() => IncompleteToken(LexState::Symbol, String::from(c)),
         whitespace!() => IncompleteToken(LexState::Start, String::new()),
         digit!() => IncompleteToken(LexState::Integer, String::from(c)),
@@ -135,6 +142,8 @@ fn state_symbol(c: char, mut lit_val: String) -> StateResult {
         _ => CompleteToken(
             match lit_val.as_str() {
                 "int" => TokenType::DataType(Type::Int),
+                "bool" => TokenType::DataType(Type::Bool),
+                "float" => TokenType::DataType(Type::Float),
                 _ => TokenType::Symbol(lit_val),
             },
             true,
@@ -143,12 +152,34 @@ fn state_symbol(c: char, mut lit_val: String) -> StateResult {
 }
 
 fn state_integer(c: char, mut lit_val: String) -> StateResult {
-    use token::TokenType::*;
     match c {
         digit!() => {
             lit_val.push(c);
             IncompleteToken(LexState::Integer, lit_val)
         }
-        _ => CompleteToken(IntLit(lit_val.parse().unwrap()), true),
+        _ => CompleteToken(TokenType::IntLit(lit_val.parse().unwrap()), true),
+    }
+}
+
+fn state_equals(c: char) -> StateResult {
+    match c {
+        '=' => CompleteToken(TokenType::Operator(Operator::Equals), false),
+        _ => CompleteToken(TokenType::Operator(Operator::Assign), true),
+    }
+}
+
+fn state_plus(c: char) -> StateResult {
+    match c {
+        '+' => CompleteToken(TokenType::Operator(Operator::Increment), false),
+        '=' => CompleteToken(TokenType::Operator(Operator::PlusAssign), false),
+        _ => CompleteToken(TokenType::Operator(Operator::Plus), true),
+    }
+}
+
+fn state_minus(c: char) -> StateResult {
+    match c {
+        '-' => CompleteToken(TokenType::Operator(Operator::Decrement), false),
+        '=' => CompleteToken(TokenType::Operator(Operator::SubAssign), false),
+        _ => CompleteToken(TokenType::Operator(Operator::Sub), true),
     }
 }

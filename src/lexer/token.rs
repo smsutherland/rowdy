@@ -67,9 +67,13 @@ impl fmt::Display for TokenType {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Operator {
     Plus,
+    PlusAssign,
+    Increment,
     Sub,
+    SubAssign,
+    Decrement,
     Assign,
-    Equal,
+    Equals,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
