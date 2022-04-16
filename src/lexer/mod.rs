@@ -27,9 +27,9 @@ use StateResult::*;
 use crate::types::Type;
 
 pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
-    let lines = match super::read_lines(&filename) {
+    let lines = match super::read_lines(filename) {
         Ok(val) => val,
-        Err(_) => return Err(format!("Could not read file {}", &filename)),
+        Err(error) => return Err(format!("Could not read file {} - {}", filename, error)),
     };
 
     let mut tokens = Vec::new();
