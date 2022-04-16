@@ -11,7 +11,7 @@ enum LexState {
 impl LexState {
     fn call(&self, c: char, lit_val: String) -> StateResult {
         match self {
-            Self::Start => state_start(c, lit_val),
+            Self::Start => state_start(c),
             Self::Symbol => state_symbol(c, lit_val),
             Self::Integer => state_integer(c, lit_val),
         }
@@ -101,7 +101,7 @@ macro_rules! digit {
     };
 }
 
-fn state_start(c: char, lit_val: String) -> StateResult {
+fn state_start(c: char) -> StateResult {
     match c {
         ';' => CompleteToken(TokenType::End, false),
         '(' => CompleteToken(TokenType::SpecialChar(SpecialChar::LParen), false),

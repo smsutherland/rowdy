@@ -1,6 +1,4 @@
 #![allow(dead_code)]
-#![allow(unused_variables)]
-#![allow(unused_mut)]
 
 use std::env;
 use std::fs::File;
