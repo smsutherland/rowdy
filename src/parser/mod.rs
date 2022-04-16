@@ -203,8 +203,9 @@ where
 
 #[derive(Debug)]
 enum Expression {
-    BracedExpression(BracedExpression),
+    Braced(BracedExpression),
     IntLit(i32),
+    FloatLit(f32),
 }
 
 impl ASTNode for Expression {
@@ -222,10 +223,11 @@ where
         TokenType::Operator(_) => panic!(),
         TokenType::DataType(_) => panic!(),
         TokenType::SpecialChar(token::SpecialChar::LBrace) => {
-            Expression::BracedExpression(braced_expression(tokens))
+            Expression::Braced(braced_expression(tokens))
         }
         TokenType::SpecialChar(_) => panic!(),
         TokenType::IntLit(x) => Expression::IntLit(x),
+        TokenType::FloatLit(x) => Expression::FloatLit(x),
         TokenType::End => panic!(),
         TokenType::Eof => panic!(),
     }

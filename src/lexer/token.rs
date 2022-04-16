@@ -39,13 +39,14 @@ impl fmt::Debug for Location<'_> {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
     Symbol(String),
     Operator(Operator),
     DataType(Type),
     SpecialChar(SpecialChar),
     IntLit(i32), // TODO: Do we need to increase this to i64? Have multiple IntLit types?
+    FloatLit(f32),
     End,
     Eof,
 }
@@ -58,6 +59,7 @@ impl fmt::Display for TokenType {
             Self::DataType(_) => write!(f, "data type"),
             Self::SpecialChar(_) => write!(f, "special char"),
             Self::IntLit(_) => write!(f, "int lit"),
+            Self::FloatLit(_) => write!(f, "float lit"),
             Self::End => write!(f, "end"),
             Self::Eof => write!(f, "eof"),
         }

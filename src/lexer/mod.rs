@@ -7,6 +7,7 @@ enum LexState {
     Start,
     Symbol,
     Integer,
+    Float,
     Equals,
     Plus,
     Minus,
@@ -18,6 +19,7 @@ impl LexState {
             Self::Start => state_start(c),
             Self::Symbol => state_symbol(c, lit_val),
             Self::Integer => state_integer(c, lit_val),
+            Self::Float => state_float(c, lit_val),
             Self::Equals => state_equals(c),
             Self::Plus => state_plus(c),
             Self::Minus => state_minus(c),
@@ -157,7 +159,21 @@ fn state_integer(c: char, mut lit_val: String) -> StateResult {
             lit_val.push(c);
             IncompleteToken(LexState::Integer, lit_val)
         }
+        '.' => {
+            lit_val.push(c);
+            IncompleteToken(LexState::Float, lit_val)
+        }
         _ => CompleteToken(TokenType::IntLit(lit_val.parse().unwrap()), true),
+    }
+}
+
+fn state_float(c: char, mut lit_val: String) -> StateResult {
+    match c {
+        digit!() => {
+            lit_val.push(c);
+            IncompleteToken(LexState::Float, lit_val)
+        }
+        _ => CompleteToken(TokenType::FloatLit(lit_val.parse().unwrap()), true),
     }
 }
 
