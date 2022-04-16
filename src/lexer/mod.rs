@@ -73,7 +73,7 @@ pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
                             });
                             continue_loop = go_back;
                         }
-                    };
+                    }
                 }
             }
         } else {
