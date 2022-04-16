@@ -219,16 +219,11 @@ where
     I: Iterator<Item = Token<'a>>,
 {
     match tokens.next().unwrap().typ {
-        TokenType::Symbol(_) => panic!(),
-        TokenType::Operator(_) => panic!(),
-        TokenType::DataType(_) => panic!(),
         TokenType::SpecialChar(token::SpecialChar::LBrace) => {
             Expression::Braced(braced_expression(tokens))
         }
-        TokenType::SpecialChar(_) => panic!(),
         TokenType::IntLit(x) => Expression::IntLit(x),
         TokenType::FloatLit(x) => Expression::FloatLit(x),
-        TokenType::End => panic!(),
-        TokenType::Eof => panic!(),
+        _ => panic!(),
     }
 }
