@@ -1,4 +1,4 @@
-mod token;
+pub mod token;
 use token::*;
 
 #[derive(PartialEq, Eq)]
@@ -23,6 +23,8 @@ enum StateResult {
     CompleteToken(TokenType, bool),
 }
 use StateResult::*;
+
+use crate::types::Type;
 
 pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
     let lines = match super::read_lines(&filename) {
@@ -74,6 +76,10 @@ pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
         }
     }
 
+    tokens.push(Token {
+        loc: Location::end(filename),
+        typ: TokenType::Eof,
+    });
     Ok(tokens)
 }
 
@@ -102,8 +108,8 @@ fn state_start(c: char, lit_val: String) -> StateResult {
         ')' => CompleteToken(TokenType::SpecialChar(SpecialChar::RParen), false),
         '[' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBracket), false),
         ']' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBracket), false),
-        '}' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBrace), false),
-        '{' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBrace), false),
+        '{' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBrace), false),
+        '}' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBrace), false),
         '=' => CompleteToken(TokenType::Operator(Operator::Assign), false),
         symbol_start!() => IncompleteToken(LexState::Symbol, String::from(c)),
         whitespace!() => IncompleteToken(LexState::Start, String::new()),
@@ -128,7 +134,7 @@ fn state_symbol(c: char, mut lit_val: String) -> StateResult {
         }
         _ => CompleteToken(
             match lit_val.as_str() {
-                "int" => TokenType::DataType(DataType::Int),
+                "int" => TokenType::DataType(Type::Int),
                 _ => TokenType::Symbol(lit_val),
             },
             true,

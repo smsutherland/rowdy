@@ -8,6 +8,8 @@ use std::io::{self, BufRead};
 use std::path::Path;
 
 mod lexer;
+mod parser;
+mod types;
 
 #[derive(Debug)]
 pub struct Config {
@@ -37,8 +39,10 @@ where
 pub fn run(config: Config) {
     let tokens = lexer::lex_file(&config.filename).unwrap();
 
-    for (i, token) in tokens.iter().enumerate() {
-        println!("{}: {:?}", i, token);
-    }
-    println!("{}", tokens.len());
+    // for t in tokens {
+    //     println!("{t:?}");
+    // }
+
+    let ast = parser::parse_tokens(tokens);
+    println!("{ast:#?}");
 }
