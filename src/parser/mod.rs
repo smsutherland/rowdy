@@ -157,6 +157,7 @@ where
 enum Statement {
     Declaration(Declaration, Option<Expression>),
     Assignment(String, Expression),
+    FunctionCall(String, Vec<Expression>),
 }
 
 impl ASTNode for Statement {
@@ -191,11 +192,34 @@ where
                 std::hint::unreachable_unchecked();
             }
         };
-        match_type!(tokens, Operator(token::Operator::Assign));
-        let expr = expression(tokens);
-        match_type!(tokens, End);
 
-        Statement::Assignment(target, expr)
+        if match_type_peek!(tokens, Operator(token::Operator::Assign)) {
+            // Assignment
+            match_type!(tokens, Operator(token::Operator::Assign));
+
+            let expr = expression(tokens);
+            match_type!(tokens, End);
+            
+            Statement::Assignment(target, expr)
+        } else if match_type_peek!(tokens, SpecialChar(token::SpecialChar::LParen)) {
+            // Function call
+            match_type!(tokens, SpecialChar(token::SpecialChar::LParen));
+            let mut exprs = Vec::new();
+            loop {
+                if match_type_peek!(tokens, SpecialChar(token::SpecialChar::RParen)) {
+                    break;
+                }
+                exprs.push(expression(tokens));
+                if match_type_peek!(tokens, SpecialChar(token::SpecialChar::Comma)) {
+                    match_type!(tokens, SpecialChar(token::SpecialChar::Comma));
+                }
+            }
+            match_type!(tokens, SpecialChar(token::SpecialChar::RParen));
+            match_type!(tokens, End);
+            Statement::FunctionCall(target, exprs)
+        } else {
+            panic!("{:?}", tokens.peek().unwrap());
+        }
     } else {
         panic!("{:?}", tokens.peek().unwrap());
     }
@@ -206,6 +230,7 @@ enum Expression {
     Braced(BracedExpression),
     IntLit(i32),
     FloatLit(f32),
+    Symbol(String),
 }
 
 impl ASTNode for Expression {
@@ -224,6 +249,7 @@ where
         }
         TokenType::IntLit(x) => Expression::IntLit(x),
         TokenType::FloatLit(x) => Expression::FloatLit(x),
+        TokenType::Symbol(s) => Expression::Symbol(s),
         _ => panic!(),
     }
 }

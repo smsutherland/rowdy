@@ -88,6 +88,7 @@ pub enum SpecialChar {
     RBrace,
     LBracket,
     RBracket,
+    Comma,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

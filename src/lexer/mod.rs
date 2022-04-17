@@ -117,6 +117,7 @@ fn state_start(c: char) -> StateResult {
         ']' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBracket), false),
         '{' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBrace), false),
         '}' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBrace), false),
+        ',' => CompleteToken(TokenType::SpecialChar(SpecialChar::Comma), false),
         '=' => IncompleteToken(LexState::Equals, String::from(c)),
         '+' => IncompleteToken(LexState::Plus, String::from(c)),
         '-' => IncompleteToken(LexState::Minus, String::from(c)),

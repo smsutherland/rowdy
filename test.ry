@@ -1,4 +1,6 @@
 int main(int y) {
     float x;
     x = 5.1;
+    print(x, y);
+    print(y);
 }
