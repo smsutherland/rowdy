@@ -97,5 +97,4 @@ pub enum Keyword {
     While,
     For,
     Return,
-    Yield,
 }

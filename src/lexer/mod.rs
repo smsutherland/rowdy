@@ -151,7 +151,6 @@ fn state_symbol(c: char, mut lit_val: String) -> StateResult {
                 "while" => TokenType::Keyword(Keyword::While),
                 "for" => TokenType::Keyword(Keyword::For),
                 "return" => TokenType::Keyword(Keyword::Return),
-                "yield" => TokenType::Keyword(Keyword::Yield),
                 _ => TokenType::Symbol(lit_val),
             },
             true,
