@@ -1,4 +1,4 @@
-use super::token::Location;
+use super::location::Location;
 use std::str::Chars;
 
 pub struct Cursor<'a> {

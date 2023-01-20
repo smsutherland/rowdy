@@ -1,7 +1,9 @@
 mod cursor;
+mod location;
 pub mod token;
 use crate::types::Type;
 use cursor::Cursor;
+pub use location::{Location, Span};
 use token::*;
 
 pub fn tokenize(input: &str) -> impl Iterator<Item = Token> {

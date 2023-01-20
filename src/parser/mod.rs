@@ -1,6 +1,7 @@
 use std::iter::Peekable;
 
-use crate::lexer::token::{self, Location, Token, TokenType};
+use crate::lexer::token::{self, Token, TokenType};
+use crate::lexer::Location;
 use crate::types::Type;
 
 pub trait ASTNode {
