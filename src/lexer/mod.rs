@@ -1,6 +1,64 @@
+mod cursor;
 pub mod token;
 use crate::types::Type;
+use cursor::Cursor;
 use token::*;
+
+pub fn tokenize(input: &str) -> impl Iterator<Item = Token> {
+    let mut cursor = Cursor::new(input);
+    std::iter::from_fn(move || next_token(&mut cursor))
+}
+
+fn next_token<'a>(cursor: &mut Cursor<'a>) -> Option<Token<'a>> {
+    let (next, start_loc) = match cursor.next() {
+        Some(result) => result,
+        None => return None,
+    };
+    match next {
+        ';' => Some(Token {
+            typ: TokenType::End,
+            span: Span::from_loc(start_loc),
+        }),
+        '(' => Some(Token {
+            typ: TokenType::SpecialChar(SpecialChar::LParen),
+            span: Span::from_loc(start_loc),
+        }),
+        ')' => Some(Token {
+            typ: TokenType::SpecialChar(SpecialChar::RParen),
+            span: Span::from_loc(start_loc),
+        }),
+        '[' => Some(Token {
+            typ: TokenType::SpecialChar(SpecialChar::LBracket),
+            span: Span::from_loc(start_loc),
+        }),
+        ']' => Some(Token {
+            typ: TokenType::SpecialChar(SpecialChar::RBracket),
+            span: Span::from_loc(start_loc),
+        }),
+        '{' => Some(Token {
+            typ: TokenType::SpecialChar(SpecialChar::LBrace),
+            span: Span::from_loc(start_loc),
+        }),
+        '}' => Some(Token {
+            typ: TokenType::SpecialChar(SpecialChar::RBrace),
+            span: Span::from_loc(start_loc),
+        }),
+        ',' => Some(Token {
+            typ: TokenType::SpecialChar(SpecialChar::Comma),
+            span: Span::from_loc(start_loc),
+        }),
+        '=' => match cursor.peek(0) {
+            Some(('=', end_loc)) => {
+                cursor.consume(1);
+                Some(Token {
+                    typ: TokenType::Operator(Operator::Equals),
+                    span: Span::from_start_end(start_loc, end_loc),
+                })
+            }
+        },
+        c => todo!("{}", c),
+    }
+}
 
 #[derive(PartialEq, Eq)]
 enum LexState {

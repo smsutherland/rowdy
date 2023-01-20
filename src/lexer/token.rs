@@ -16,7 +16,15 @@ pub struct Span<'a> {
 }
 
 impl<'a> Span<'a> {
-    fn from_loc(loc: FileLocation<'a>) -> Self {
+    pub fn from_loc(loc: Location) -> Self {
+        Self {
+            file: None,
+            start: loc,
+            end: loc,
+        }
+    }
+
+    pub fn from_file_loc(loc: FileLocation<'a>) -> Self {
         Self {
             file: loc.file,
             start: loc.loc,
@@ -24,12 +32,20 @@ impl<'a> Span<'a> {
         }
     }
 
-    fn from_start_end(start: FileLocation<'a>, end: FileLocation<'a>) -> Self {
+    pub fn from_start_end_file(start: FileLocation<'a>, end: FileLocation<'a>) -> Self {
         if start.file != end.file {
             panic!("Cannot create a span across multiple files.");
         }
         Self {
             file: start.file,
+            start: start.loc,
+            end: end.loc,
+        }
+    }
+
+    pub fn from_start_end(start: Location<'a>, end: Location<'a>) -> Self {
+        Self {
+            file: None,
             start: start.loc,
             end: end.loc,
         }
