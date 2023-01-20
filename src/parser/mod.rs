@@ -8,17 +8,17 @@ pub trait ASTNode {
 }
 
 #[derive(Debug)]
-pub struct Program<'a> {
-    functions: Vec<Function<'a>>,
+pub struct Program {
+    functions: Vec<Function>,
 }
 
-impl ASTNode for Program<'_> {
+impl ASTNode for Program {
     fn loc(&self) -> Location {
         todo!("program loc")
     }
 }
 
-pub type Ast<'a> = Program<'a>;
+pub type Ast = Program;
 
 macro_rules! match_type_peek {
     ($tokens:expr, $typ:pat) => {
@@ -67,26 +67,26 @@ pub fn parse_tokens(tokens: Vec<Token>) -> Ast {
 }
 
 #[derive(Debug)]
-pub struct Function<'a> {
-    loc: Location<'a>,
+pub struct Function {
+    loc: Location,
     return_type: Type,
     name: String,
     parameters: Vec<Declaration>,
     expr: BracedExpression,
 }
 
-impl<'a> ASTNode for Function<'a> {
-    fn loc(&self) -> Location<'a> {
+impl<'a> ASTNode for Function {
+    fn loc(&self) -> Location {
         self.loc
     }
 }
 
-fn function<'a, I>(tokens: &mut Peekable<I>) -> Function<'a>
+fn function<'a, I>(tokens: &mut Peekable<I>) -> Function
 where
     I: Iterator<Item = Token<'a>>,
 {
     use TokenType::*;
-    let loc = tokens.peek().unwrap().loc;
+    let loc = tokens.peek().unwrap().span;
     let return_type = match_type!(tokens, DataType(t), t);
     let name = match_type!(tokens, Symbol(s), s);
     match_type!(tokens, SpecialChar(token::SpecialChar::LParen));
@@ -99,7 +99,7 @@ where
     let expr = braced_expression(tokens);
 
     Function {
-        loc,
+        loc: todo!(),
         return_type,
         name,
         parameters,
@@ -199,7 +199,7 @@ where
 
             let expr = expression(tokens);
             match_type!(tokens, End);
-            
+
             Statement::Assignment(target, expr)
         } else if match_type_peek!(tokens, SpecialChar(token::SpecialChar::LParen)) {
             // Function call

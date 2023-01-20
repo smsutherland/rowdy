@@ -41,11 +41,7 @@ pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
 
     let mut tokens = Vec::new();
     let mut state = LexState::Start;
-    let mut token_start = Location {
-        file: filename,
-        line: 0,
-        col: 0,
-    };
+    let mut token_start = Location { line: 0, col: 0 };
     let mut current_substr = String::new();
 
     for (line_num, line) in lines.enumerate() {
@@ -56,7 +52,6 @@ pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
                     continue_loop = false;
                     if state == LexState::Start {
                         token_start = Location {
-                            file: filename,
                             line: line_num + 1, // line numbers are 1-indexed
                             col: col_num + 1,   // col numbers are 1-indexed
                         };
@@ -71,7 +66,7 @@ pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
                             current_substr = String::new();
                             tokens.push(Token {
                                 typ: next_token,
-                                loc: token_start,
+                                span: todo!(),
                             });
                             continue_loop = go_back;
                         }
@@ -84,7 +79,7 @@ pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
     }
 
     tokens.push(Token {
-        loc: Location::end(filename),
+        span: todo!(),
         typ: TokenType::Eof,
     });
     Ok(tokens)

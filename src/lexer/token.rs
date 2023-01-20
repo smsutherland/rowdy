@@ -5,35 +5,77 @@ use crate::types::Type;
 #[derive(Debug, Clone)]
 pub struct Token<'a> {
     pub typ: TokenType,
-    pub loc: Location<'a>,
+    pub span: Span<'a>,
 }
 
-#[derive(Clone, Copy)]
-pub struct Location<'a> {
-    pub file: &'a str,
-    pub line: usize,
-    pub col: usize,
+#[derive(Debug, Clone)]
+pub struct Span<'a> {
+    pub file: Option<&'a str>,
+    pub start: Location,
+    pub end: Location,
 }
 
-impl<'a> Location<'a> {
-    /// Definition of the location of the end of a file.
-    /// All EOF tokens should have their locations come from this function.
-    pub fn end(file: &'a str) -> Self {
+impl<'a> Span<'a> {
+    fn from_loc(loc: FileLocation<'a>) -> Self {
         Self {
-            file,
-            line: 0,
-            col: 0,
+            file: loc.file,
+            start: loc.loc,
+            end: loc.loc,
+        }
+    }
+
+    fn from_start_end(start: FileLocation<'a>, end: FileLocation<'a>) -> Self {
+        if start.file != end.file {
+            panic!("Cannot create a span across multiple files.");
+        }
+        Self {
+            file: start.file,
+            start: start.loc,
+            end: end.loc,
         }
     }
 }
 
-impl fmt::Display for Location<'_> {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}:{}:{}", self.file, self.line, self.col)
+#[derive(Clone, Copy)]
+pub struct FileLocation<'a> {
+    pub file: Option<&'a str>,
+    pub loc: Location,
+}
+
+#[derive(Clone, Copy)]
+pub struct Location {
+    pub line: usize,
+    pub col: usize,
+}
+
+impl fmt::Display for Location {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}:{}", self.line, self.col)
     }
 }
 
-impl fmt::Debug for Location<'_> {
+impl fmt::Debug for Location {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
+impl fmt::Display for FileLocation<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}:{}:{}",
+            match self.file {
+                Some(file) => file,
+                None => "anon",
+            },
+            self.loc.line,
+            self.loc.col
+        )
+    }
+}
+
+impl fmt::Debug for FileLocation<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self)
     }
