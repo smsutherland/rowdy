@@ -1,22 +1,20 @@
 use std::fmt;
 
-use super::location::{Location, Span};
-use crate::types::Type;
+use super::location::Span;
 
 #[derive(Debug, Clone)]
-pub struct Token<'a> {
+pub struct Token {
     pub typ: TokenType,
-    pub span: Span<'a>,
+    pub span: Span,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TokenType {
-    Symbol(String),
+    Symbol,
     Operator(Operator),
-    DataType(Type),
     SpecialChar(SpecialChar),
-    IntLit(i32), // TODO: Do we need to increase this to i64? Have multiple IntLit types?
-    FloatLit(f32),
+    IntLit,
+    FloatLit,
     Keyword(Keyword),
     End,
     Eof,
@@ -25,12 +23,11 @@ pub enum TokenType {
 impl fmt::Display for TokenType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::Symbol(_) => write!(f, "symbol"),
+            Self::Symbol => write!(f, "symbol"),
             Self::Operator(_) => write!(f, "operator"),
-            Self::DataType(_) => write!(f, "data type"),
             Self::SpecialChar(_) => write!(f, "special char"),
-            Self::IntLit(_) => write!(f, "int lit"),
-            Self::FloatLit(_) => write!(f, "float lit"),
+            Self::IntLit => write!(f, "int lit"),
+            Self::FloatLit => write!(f, "float lit"),
             Self::Keyword(_) => write!(f, "keyword"),
             Self::End => write!(f, "end"),
             Self::Eof => write!(f, "eof"),

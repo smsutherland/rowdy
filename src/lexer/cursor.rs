@@ -1,6 +1,7 @@
 use super::location::Location;
 use std::str::Chars;
 
+#[derive(Debug, Clone)]
 pub struct Cursor<'a> {
     chars: Chars<'a>,
     pub current_loc: Location,
@@ -10,7 +11,11 @@ impl<'a> Cursor<'a> {
     pub fn new(input: &'a str) -> Self {
         Self {
             chars: input.chars(),
-            current_loc: Location { line: 0, col: 0 },
+            current_loc: Location {
+                line: 1,
+                col: 1,
+                char_num: 0,
+            },
         }
     }
 
@@ -19,23 +24,54 @@ impl<'a> Cursor<'a> {
         let next = self.chars.next();
         if next.is_some() {
             self.current_loc.col += 1;
+            self.current_loc.char_num += 1;
             if let Some('\n') = next {
                 self.current_loc = Location {
-                    line: self.current_loc.line,
                     col: 1,
+                    ..self.current_loc
                 }
             }
         }
         next.map(|c| (c, loc))
     }
 
-    pub fn peek(&mut self, num_ahead: usize) -> Option<(char, Location)> {
-        let loc = self.current_loc;
-        self.chars.clone().nth(num_ahead).map(|c| (c, loc))
+    /// Peeks at the nth next item.
+    /// peek(0) returns the next item.
+    pub fn peek(&self, n: usize) -> Option<(char, Location)> {
+        let mut temp_cursor = self.clone();
+        for _ in 0..n {
+            temp_cursor.next();
+        }
+        temp_cursor.next()
     }
 
-    pub fn consume(&mut self, num_ahead: usize) -> Option<(char, Location)> {
-        let loc = self.current_loc;
-        self.chars.nth(num_ahead - 1).map(|c| (c, loc))
+    /// Peeks at the nth next item.
+    /// peek(0) returns the next item.
+    /// Less expensive than peek because this doesn't have to return the location.
+    pub fn peek_char(&self, n: usize) -> Option<char> {
+        self.chars.clone().nth(n)
+    }
+
+    /// Consumes n items and returns the last one.
+    /// consume(0) returns the next item.
+    pub fn consume(&mut self, n: usize) -> Option<(char, Location)> {
+        for _ in 0..n {
+            self.next();
+        }
+        self.next()
+    }
+
+    /// Consumes chars while `f` is true.
+    /// Returns the loation of the last char matching `f`.
+    pub fn eat_while(&mut self, f: impl Fn(&char) -> bool) -> Location {
+        let mut last_loc = self.current_loc;
+        while let Some(c) = self.peek_char(0) {
+            if !f(&c) {
+                break;
+            }
+            // unwrap never fails because we already checked if the next char is a Some(_)
+            last_loc = self.consume(0).unwrap().1;
+        }
+        last_loc
     }
 }

@@ -4,10 +4,11 @@ use std::fmt;
 pub struct Location {
     pub line: usize,
     pub col: usize,
+    pub char_num: usize,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-enum Source<'a> {
+pub enum Source<'a> {
     File(&'a str),
     Anonymous,
 }
@@ -18,9 +19,9 @@ pub struct SourceLocation<'a> {
     pub loc: Location,
 }
 
-#[derive(Debug, Clone)]
-pub struct Span<'a> {
-    pub file: Source<'a>,
+#[derive(Debug, Clone, Copy)]
+pub struct Span {
+    // pub file: Source<'a>,
     pub start: Location,
     pub end: Location,
 }
@@ -67,18 +68,18 @@ impl fmt::Debug for SourceLocation<'_> {
     }
 }
 
-impl<'a> Span<'a> {
+impl Span {
     pub fn from_loc(loc: Location) -> Self {
         Self {
-            file: Source::Anonymous,
+            // file: Source::Anonymous,
             start: loc,
             end: loc,
         }
     }
 
-    pub fn from_source_loc(loc: SourceLocation<'a>) -> Self {
+    pub fn from_source_loc<'a>(loc: SourceLocation<'a>) -> Self {
         Self {
-            file: loc.file,
+            // file: loc.file,
             start: loc.loc,
             end: loc.loc,
         }
@@ -86,20 +87,24 @@ impl<'a> Span<'a> {
 
     pub fn from_start_end(start: Location, end: Location) -> Self {
         Self {
-            file: Source::Anonymous,
+            // file: Source::Anonymous,
             start,
             end,
         }
     }
 
-    pub fn from_source_start_end(start: SourceLocation<'a>, end: SourceLocation<'a>) -> Self {
+    pub fn from_source_start_end<'a>(start: SourceLocation<'a>, end: SourceLocation<'a>) -> Self {
         if start.file != end.file {
             panic!("Cannot create a span across multiple files.");
         }
         Self {
-            file: start.file,
+            // file: start.file,
             start: start.loc,
             end: end.loc,
         }
+    }
+
+    pub fn slice<'b>(&self, s: &'b str) -> &'b str {
+        &s[self.start.char_num..=self.end.char_num]
     }
 }

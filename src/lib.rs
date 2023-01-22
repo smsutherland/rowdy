@@ -2,11 +2,12 @@
 
 use std::env;
 use std::fs::File;
+use std::io::Read;
 use std::io::{self, BufRead};
 use std::path::Path;
 
 mod lexer;
-mod parser;
+// mod parser;
 mod types;
 
 #[derive(Debug)]
@@ -35,12 +36,15 @@ where
 }
 
 pub fn run(config: Config) {
-    let tokens = lexer::lex_file(&config.filename).unwrap();
+    let mut file = std::fs::File::open(&config.filename).unwrap();
+    let mut buf = String::new();
+    file.read_to_string(&mut buf).unwrap();
+    let tokens = lexer::tokenize(&buf);
 
-    // for t in tokens {
-    //     println!("{t:?}");
-    // }
+    for t in tokens {
+        println!("{t:?}");
+    }
 
-    let ast = parser::parse_tokens(tokens);
-    println!("{ast:#?}");
+    // let ast = parser::parse_tokens(tokens);
+    // println!("{ast:#?}");
 }

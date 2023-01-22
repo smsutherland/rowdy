@@ -1,262 +1,149 @@
 mod cursor;
 mod location;
 pub mod token;
-use crate::types::Type;
 use cursor::Cursor;
 pub use location::{Location, Span};
 use token::*;
 
-pub fn tokenize(input: &str) -> impl Iterator<Item = Token> {
-    let mut cursor = Cursor::new(input);
+pub fn tokenize<'a>(input: &'a str) -> impl Iterator<Item = Token> + 'a {
+    let mut cursor = Cursor::<'a>::new(input);
     std::iter::from_fn(move || next_token(&mut cursor))
 }
 
-fn next_token<'a>(cursor: &mut Cursor<'a>) -> Option<Token<'a>> {
-    let (next, start_loc) = match cursor.next() {
-        Some(result) => result,
-        None => return None,
-    };
-    match next {
-        ';' => Some(Token {
-            typ: TokenType::End,
-            span: Span::from_loc(start_loc),
-        }),
-        '(' => Some(Token {
-            typ: TokenType::SpecialChar(SpecialChar::LParen),
-            span: Span::from_loc(start_loc),
-        }),
-        ')' => Some(Token {
-            typ: TokenType::SpecialChar(SpecialChar::RParen),
-            span: Span::from_loc(start_loc),
-        }),
-        '[' => Some(Token {
-            typ: TokenType::SpecialChar(SpecialChar::LBracket),
-            span: Span::from_loc(start_loc),
-        }),
-        ']' => Some(Token {
-            typ: TokenType::SpecialChar(SpecialChar::RBracket),
-            span: Span::from_loc(start_loc),
-        }),
-        '{' => Some(Token {
-            typ: TokenType::SpecialChar(SpecialChar::LBrace),
-            span: Span::from_loc(start_loc),
-        }),
-        '}' => Some(Token {
-            typ: TokenType::SpecialChar(SpecialChar::RBrace),
-            span: Span::from_loc(start_loc),
-        }),
-        ',' => Some(Token {
-            typ: TokenType::SpecialChar(SpecialChar::Comma),
-            span: Span::from_loc(start_loc),
-        }),
-        '=' => match cursor.peek(0) {
-            Some(('=', end_loc)) => {
-                cursor.consume(1);
-                Some(Token {
-                    typ: TokenType::Operator(Operator::Equals),
-                    span: Span::from_start_end(start_loc, end_loc),
-                })
-            }
-        },
-        c => todo!("{}", c),
-    }
-}
-
-#[derive(PartialEq, Eq)]
-enum LexState {
-    Start,
-    Symbol,
-    Integer,
-    Float,
-    Equals,
-    Plus,
-    Minus,
-}
-
-impl LexState {
-    fn call(&self, c: char, lit_val: String) -> StateResult {
-        match self {
-            Self::Start => state_start(c),
-            Self::Symbol => state_symbol(c, lit_val),
-            Self::Integer => state_integer(c, lit_val),
-            Self::Float => state_float(c, lit_val),
-            Self::Equals => state_equals(c),
-            Self::Plus => state_plus(c),
-            Self::Minus => state_minus(c),
-        }
-    }
-}
-
-enum StateResult {
-    IncompleteToken(LexState, String),
-    CompleteToken(TokenType, bool),
-}
-use StateResult::*;
-
-pub fn lex_file(filename: &str) -> Result<Vec<Token>, String> {
-    let lines = match super::read_lines(filename) {
-        Ok(val) => val,
-        Err(error) => return Err(format!("Could not read file {} - {}", filename, error)),
-    };
-
-    let mut tokens = Vec::new();
-    let mut state = LexState::Start;
-    let mut token_start = Location { line: 0, col: 0 };
-    let mut current_substr = String::new();
-
-    for (line_num, line) in lines.enumerate() {
-        if let Ok(line) = line {
-            for (col_num, c) in line.chars().enumerate() {
-                let mut continue_loop = true;
-                while continue_loop {
-                    continue_loop = false;
-                    if state == LexState::Start {
-                        token_start = Location {
-                            line: line_num + 1, // line numbers are 1-indexed
-                            col: col_num + 1,   // col numbers are 1-indexed
-                        };
-                    }
-                    match state.call(c, current_substr) {
-                        IncompleteToken(next_state, next_substr) => {
-                            state = next_state;
-                            current_substr = next_substr;
-                        }
-                        CompleteToken(next_token, go_back) => {
-                            state = LexState::Start;
-                            current_substr = String::new();
-                            tokens.push(Token {
-                                typ: next_token,
-                                span: todo!(),
-                            });
-                            continue_loop = go_back;
-                        }
+fn next_token<'a>(cursor: &mut Cursor<'a>) -> Option<Token> {
+    loop {
+        let (next, start_loc) = match cursor.next() {
+            Some(result) => result,
+            None => return None,
+        };
+        break Some(match next {
+            ';' => Token {
+                typ: TokenType::End,
+                span: Span::from_loc(start_loc),
+            },
+            '(' => Token {
+                typ: TokenType::SpecialChar(SpecialChar::LParen),
+                span: Span::from_loc(start_loc),
+            },
+            ')' => Token {
+                typ: TokenType::SpecialChar(SpecialChar::RParen),
+                span: Span::from_loc(start_loc),
+            },
+            '[' => Token {
+                typ: TokenType::SpecialChar(SpecialChar::LBracket),
+                span: Span::from_loc(start_loc),
+            },
+            ']' => Token {
+                typ: TokenType::SpecialChar(SpecialChar::RBracket),
+                span: Span::from_loc(start_loc),
+            },
+            '{' => Token {
+                typ: TokenType::SpecialChar(SpecialChar::LBrace),
+                span: Span::from_loc(start_loc),
+            },
+            '}' => Token {
+                typ: TokenType::SpecialChar(SpecialChar::RBrace),
+                span: Span::from_loc(start_loc),
+            },
+            ',' => Token {
+                typ: TokenType::SpecialChar(SpecialChar::Comma),
+                span: Span::from_loc(start_loc),
+            },
+            '=' => match cursor.peek(0) {
+                Some(('=', end_loc)) => {
+                    cursor.consume(0);
+                    Token {
+                        typ: TokenType::Operator(Operator::Equals),
+                        span: Span::from_start_end(start_loc, end_loc),
                     }
                 }
+                _ => Token {
+                    typ: TokenType::Operator(Operator::Assign),
+                    span: Span::from_loc(start_loc),
+                },
+            },
+            '+' => match cursor.peek(0) {
+                Some(('+', end_loc)) => {
+                    cursor.consume(0);
+                    Token {
+                        typ: TokenType::Operator(Operator::Increment),
+                        span: Span::from_start_end(start_loc, end_loc),
+                    }
+                }
+                Some(('=', end_loc)) => {
+                    cursor.consume(0);
+                    Token {
+                        typ: TokenType::Operator(Operator::PlusAssign),
+                        span: Span::from_start_end(start_loc, end_loc),
+                    }
+                }
+                _ => Token {
+                    typ: TokenType::Operator(Operator::Plus),
+                    span: Span::from_loc(start_loc),
+                },
+            },
+            '-' => match cursor.peek(0) {
+                Some(('-', end_loc)) => {
+                    cursor.consume(0);
+                    Token {
+                        typ: TokenType::Operator(Operator::Decrement),
+                        span: Span::from_start_end(start_loc, end_loc),
+                    }
+                }
+                Some(('=', end_loc)) => {
+                    cursor.consume(0);
+                    Token {
+                        typ: TokenType::Operator(Operator::SubAssign),
+                        span: Span::from_start_end(start_loc, end_loc),
+                    }
+                }
+                _ => Token {
+                    typ: TokenType::Operator(Operator::Sub),
+                    span: Span::from_loc(start_loc),
+                },
+            },
+            c if c.is_ascii_digit() => cursor.number(start_loc),
+            c if is_symbol_start(&c) => cursor.symbol(start_loc),
+            c if c.is_whitespace() => continue,
+
+            c => todo!("'{}'", c),
+        });
+    }
+}
+
+#[inline]
+fn is_symbol_start(c: &char) -> bool {
+    matches!(c, 'a'..='z'|'A'..='Z'|'_')
+}
+
+#[inline]
+fn is_symbol_middle(c: &char) -> bool {
+    matches!(c,  'a'..='z'|'A'..='Z'|'_'|'0'..='9')
+}
+
+impl<'a> Cursor<'a> {
+    fn number(&mut self, start_loc: Location) -> Token {
+        let end_loc = self.eat_while(char::is_ascii_digit);
+        if let Some('.') = self.peek_char(0) {
+            self.consume(0);
+            let end_loc = self.eat_while(char::is_ascii_digit);
+            Token {
+                typ: TokenType::FloatLit,
+                span: Span::from_start_end(start_loc, end_loc),
             }
         } else {
-            todo!("Error handling");
+            Token {
+                typ: TokenType::IntLit,
+                span: Span::from_start_end(start_loc, end_loc),
+            }
         }
     }
 
-    tokens.push(Token {
-        span: todo!(),
-        typ: TokenType::Eof,
-    });
-    Ok(tokens)
-}
-
-macro_rules! symbol_start {
-    () => {
-        'a'..='z'|'A'..='Z'|'_'
-    };
-}
-
-macro_rules! whitespace {
-    () => {
-        ' ' | '\t'
-    };
-}
-
-macro_rules! digit {
-    () => {
-        '0'..='9'
-    };
-}
-
-fn state_start(c: char) -> StateResult {
-    match c {
-        ';' => CompleteToken(TokenType::End, false),
-        '(' => CompleteToken(TokenType::SpecialChar(SpecialChar::LParen), false),
-        ')' => CompleteToken(TokenType::SpecialChar(SpecialChar::RParen), false),
-        '[' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBracket), false),
-        ']' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBracket), false),
-        '{' => CompleteToken(TokenType::SpecialChar(SpecialChar::LBrace), false),
-        '}' => CompleteToken(TokenType::SpecialChar(SpecialChar::RBrace), false),
-        ',' => CompleteToken(TokenType::SpecialChar(SpecialChar::Comma), false),
-        '=' => IncompleteToken(LexState::Equals, String::from(c)),
-        '+' => IncompleteToken(LexState::Plus, String::from(c)),
-        '-' => IncompleteToken(LexState::Minus, String::from(c)),
-        symbol_start!() => IncompleteToken(LexState::Symbol, String::from(c)),
-        whitespace!() => IncompleteToken(LexState::Start, String::new()),
-        digit!() => IncompleteToken(LexState::Integer, String::from(c)),
-        _ => {
-            panic!("unrecognized character '{c}'");
+    fn symbol(&mut self, start_loc: Location) -> Token {
+        let end_loc = self.eat_while(is_symbol_middle);
+        Token {
+            typ: TokenType::Symbol,
+            span: Span::from_start_end(start_loc, end_loc),
         }
-    }
-}
-
-macro_rules! symbol_mid {
-    () => {
-        symbol_start!() | digit!()
-    };
-}
-
-fn state_symbol(c: char, mut lit_val: String) -> StateResult {
-    match c {
-        symbol_mid!() => {
-            lit_val.push(c);
-            IncompleteToken(LexState::Symbol, lit_val)
-        }
-        _ => CompleteToken(
-            match lit_val.as_str() {
-                "int" => TokenType::DataType(Type::Int),
-                "bool" => TokenType::DataType(Type::Bool),
-                "float" => TokenType::DataType(Type::Float),
-                "if" => TokenType::Keyword(Keyword::If),
-                "else" => TokenType::Keyword(Keyword::Else),
-                "while" => TokenType::Keyword(Keyword::While),
-                "for" => TokenType::Keyword(Keyword::For),
-                "return" => TokenType::Keyword(Keyword::Return),
-                _ => TokenType::Symbol(lit_val),
-            },
-            true,
-        ),
-    }
-}
-
-fn state_integer(c: char, mut lit_val: String) -> StateResult {
-    match c {
-        digit!() => {
-            lit_val.push(c);
-            IncompleteToken(LexState::Integer, lit_val)
-        }
-        '.' => {
-            lit_val.push(c);
-            IncompleteToken(LexState::Float, lit_val)
-        }
-        _ => CompleteToken(TokenType::IntLit(lit_val.parse().unwrap()), true),
-    }
-}
-
-fn state_float(c: char, mut lit_val: String) -> StateResult {
-    match c {
-        digit!() => {
-            lit_val.push(c);
-            IncompleteToken(LexState::Float, lit_val)
-        }
-        _ => CompleteToken(TokenType::FloatLit(lit_val.parse().unwrap()), true),
-    }
-}
-
-fn state_equals(c: char) -> StateResult {
-    match c {
-        '=' => CompleteToken(TokenType::Operator(Operator::Equals), false),
-        _ => CompleteToken(TokenType::Operator(Operator::Assign), true),
-    }
-}
-
-fn state_plus(c: char) -> StateResult {
-    match c {
-        '+' => CompleteToken(TokenType::Operator(Operator::Increment), false),
-        '=' => CompleteToken(TokenType::Operator(Operator::PlusAssign), false),
-        _ => CompleteToken(TokenType::Operator(Operator::Plus), true),
-    }
-}
-
-fn state_minus(c: char) -> StateResult {
-    match c {
-        '-' => CompleteToken(TokenType::Operator(Operator::Decrement), false),
-        '=' => CompleteToken(TokenType::Operator(Operator::SubAssign), false),
-        _ => CompleteToken(TokenType::Operator(Operator::Sub), true),
     }
 }
