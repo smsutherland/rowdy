@@ -77,7 +77,7 @@ impl Span {
         }
     }
 
-    pub fn from_source_loc<'a>(loc: SourceLocation<'a>) -> Self {
+    pub fn from_source_loc(loc: SourceLocation) -> Self {
         Self {
             // file: loc.file,
             start: loc.loc,

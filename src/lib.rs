@@ -1,10 +1,7 @@
 #![allow(dead_code)]
 
 use std::env;
-use std::fs::File;
 use std::io::Read;
-use std::io::{self, BufRead};
-use std::path::Path;
 
 mod lexer;
 // mod parser;
@@ -27,16 +24,8 @@ impl Config {
     }
 }
 
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
-where
-    P: AsRef<Path>,
-{
-    let file = File::open(filename)?;
-    Ok(io::BufReader::new(file).lines())
-}
-
 pub fn run(config: Config) {
-    let mut file = std::fs::File::open(&config.filename).unwrap();
+    let mut file = std::fs::File::open(config.filename).unwrap();
     let mut buf = String::new();
     file.read_to_string(&mut buf).unwrap();
     let tokens = lexer::tokenize(&buf);

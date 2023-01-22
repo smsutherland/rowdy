@@ -10,7 +10,7 @@ pub fn tokenize<'a>(input: &'a str) -> impl Iterator<Item = Token> + 'a {
     std::iter::from_fn(move || next_token(&mut cursor))
 }
 
-fn next_token<'a>(cursor: &mut Cursor<'a>) -> Option<Token> {
+fn next_token(cursor: &mut Cursor) -> Option<Token> {
     loop {
         let (next, start_loc) = match cursor.next() {
             Some(result) => result,
