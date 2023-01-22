@@ -28,6 +28,7 @@ impl<'a> Cursor<'a> {
             if let Some('\n') = next {
                 self.current_loc = Location {
                     col: 1,
+                    line: self.current_loc.line + 1,
                     ..self.current_loc
                 }
             }
@@ -63,14 +64,14 @@ impl<'a> Cursor<'a> {
 
     /// Consumes chars while `f` is true.
     /// Returns the loation of the last char matching `f`.
-    pub fn eat_while(&mut self, f: impl Fn(&char) -> bool) -> Location {
-        let mut last_loc = self.current_loc;
+    pub fn eat_while(&mut self, f: impl Fn(&char) -> bool) -> Option<Location> {
+        let mut last_loc = None;
         while let Some(c) = self.peek_char(0) {
             if !f(&c) {
                 break;
             }
-            // unwrap never fails because we already checked if the next char is a Some(_)
-            last_loc = self.consume(0).unwrap().1;
+            // SAFETY: unwrap never fails because we already checked if the next char is a Some(_)
+            last_loc = unsafe { Some(self.consume(0).unwrap_unchecked().1) };
         }
         last_loc
     }

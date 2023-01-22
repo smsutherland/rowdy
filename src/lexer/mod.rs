@@ -147,12 +147,12 @@ impl<'a> Cursor<'a> {
             let end_loc = self.eat_while(char::is_ascii_digit);
             Token {
                 typ: TokenType::FloatLit,
-                span: Span::from_start_end(start_loc, end_loc),
+                span: Span::from_start_end(start_loc, end_loc.unwrap_or(start_loc)),
             }
         } else {
             Token {
                 typ: TokenType::IntLit,
-                span: Span::from_start_end(start_loc, end_loc),
+                span: Span::from_start_end(start_loc, end_loc.unwrap_or(start_loc)),
             }
         }
     }
@@ -161,7 +161,7 @@ impl<'a> Cursor<'a> {
         let end_loc = self.eat_while(is_symbol_middle);
         Token {
             typ: TokenType::Symbol,
-            span: Span::from_start_end(start_loc, end_loc),
+            span: Span::from_start_end(start_loc, end_loc.unwrap_or(start_loc)),
         }
     }
 }
