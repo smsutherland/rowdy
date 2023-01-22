@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{ffi::OsString, fmt};
 
 #[derive(Clone, Copy)]
 pub struct Location {
@@ -7,15 +7,15 @@ pub struct Location {
     pub char_num: usize,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Source<'a> {
-    File(&'a str),
+#[derive(Debug, Clone, PartialEq)]
+pub enum Source {
+    File(OsString),
     Anonymous,
 }
 
-#[derive(Clone, Copy)]
-pub struct SourceLocation<'a> {
-    pub file: Source<'a>,
+#[derive(Clone)]
+pub struct SourceLocation {
+    pub file: Source,
     pub loc: Location,
 }
 
@@ -47,22 +47,16 @@ impl fmt::Debug for Location {
     }
 }
 
-impl fmt::Display for SourceLocation<'_> {
+impl fmt::Display for SourceLocation {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "{}:{}:{}",
-            match self.file {
-                Source::File(file) => file,
-                Source::Anonymous => "anon",
-            },
-            self.loc.line,
-            self.loc.col
-        )
+        match &self.file {
+            Source::File(file) => write!(f, "{:?}:{}:{}", file, self.loc.line, self.loc.col),
+            Source::Anonymous => write!(f, "anon:{}:{}", self.loc.line, self.loc.col),
+        }
     }
 }
 
-impl fmt::Debug for SourceLocation<'_> {
+impl fmt::Debug for SourceLocation {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self)
     }
@@ -93,7 +87,7 @@ impl Span {
         }
     }
 
-    pub fn from_source_start_end<'a>(start: SourceLocation<'a>, end: SourceLocation<'a>) -> Self {
+    pub fn from_source_start_end(start: SourceLocation, end: SourceLocation) -> Self {
         if start.file != end.file {
             panic!("Cannot create a span across multiple files.");
         }

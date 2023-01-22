@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use lexer::location::Source;
 use std::env;
 use std::io::Read;
 
@@ -24,11 +25,29 @@ impl Config {
     }
 }
 
+#[derive(Debug)]
+pub struct Compiler {
+    config: Config,
+    source: Source,
+    code: String,
+}
+
+impl Compiler {
+    pub fn new(config: Config) -> std::io::Result<Self> {
+        let mut c = Compiler {
+            source: Source::File(config.filename.clone().into()),
+            code: String::new(),
+            config,
+        };
+        let mut in_file = std::fs::File::open(&c.config.filename)?;
+        in_file.read_to_string(&mut c.code)?;
+        Ok(c)
+    }
+}
+
 pub fn run(config: Config) {
-    let mut file = std::fs::File::open(config.filename).unwrap();
-    let mut buf = String::new();
-    file.read_to_string(&mut buf).unwrap();
-    let tokens = lexer::tokenize(&buf);
+    let mut compiler = Compiler::new(config).expect("TODO: handle errors here");
+    let tokens = lexer::tokenize(&mut compiler);
 
     for t in tokens {
         println!("{t:?}");

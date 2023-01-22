@@ -1,13 +1,31 @@
 mod cursor;
-mod location;
+pub mod location;
 pub mod token;
+use crate::Compiler;
 use cursor::Cursor;
 pub use location::{Location, Span};
 use token::*;
 
-pub fn tokenize<'a>(input: &'a str) -> impl Iterator<Item = Token> + 'a {
-    let mut cursor = Cursor::<'a>::new(input);
-    std::iter::from_fn(move || next_token(&mut cursor))
+#[derive(Debug)]
+pub struct TokenIter<'a> {
+    cursor: Cursor<'a>,
+}
+
+impl<'a> Iterator for TokenIter<'a> {
+    type Item = Token;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        next_token(&mut self.cursor)
+    }
+}
+
+pub fn tokenize(compiler: &mut Compiler) -> TokenIter {
+    tokenize_str(&compiler.code)
+}
+
+pub fn tokenize_str(input: &str) -> TokenIter {
+    let cursor = Cursor::new(input);
+    TokenIter { cursor }
 }
 
 fn next_token(cursor: &mut Cursor) -> Option<Token> {
