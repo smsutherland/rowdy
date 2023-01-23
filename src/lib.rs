@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
 use lexer::location::Source;
-use std::env;
 use std::io::Read;
 
 mod lexer;
@@ -10,37 +9,41 @@ mod types;
 
 #[derive(Debug)]
 pub struct Config {
-    pub filename: String,
+    pub source: Source,
 }
 
 impl Config {
-    pub fn new(mut args: env::Args) -> Result<Config, &'static str> {
-        args.next();
-        let filename = match args.next() {
-            Some(val) => val,
+    pub fn new_from_args() -> Result<Config, &'static str> {
+        let mut args = std::env::args_os();
+        args.next(); // program name
+        let source = match args.next() {
+            Some(val) => Source::File(val),
             None => return Err("Didn't get a filename"),
         };
 
-        Ok(Config { filename })
+        Ok(Config { source })
     }
 }
 
 #[derive(Debug)]
 pub struct Compiler {
     config: Config,
-    source: Source,
     code: String,
 }
 
 impl Compiler {
     pub fn new(config: Config) -> std::io::Result<Self> {
         let mut c = Compiler {
-            source: Source::File(config.filename.clone().into()),
             code: String::new(),
             config,
         };
-        let mut in_file = std::fs::File::open(&c.config.filename)?;
-        in_file.read_to_string(&mut c.code)?;
+        match &c.config.source {
+            Source::File(fname) => {
+                let mut in_file = std::fs::File::open(fname)?;
+                in_file.read_to_string(&mut c.code)?;
+            }
+            Source::Anonymous => {}
+        }
         Ok(c)
     }
 }
