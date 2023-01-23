@@ -1,9 +1,8 @@
 mod cursor;
-pub mod location;
 pub mod token;
+pub use crate::location::{Location, Span};
 use crate::Compiler;
 use cursor::Cursor;
-pub use location::{Location, Span};
 use token::*;
 
 #[derive(Debug)]

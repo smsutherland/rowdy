@@ -1,4 +1,4 @@
-use super::location::Location;
+use crate::location::Location;
 use std::str::Chars;
 
 #[derive(Debug, Clone)]

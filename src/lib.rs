@@ -1,11 +1,12 @@
 #![allow(dead_code)]
 
-use lexer::location::Source;
-use std::io::Read;
-
 mod lexer;
+mod location;
 // mod parser;
 mod types;
+
+use location::Source;
+use std::io::Read;
 
 #[derive(Debug)]
 pub struct Config {

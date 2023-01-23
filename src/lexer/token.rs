@@ -1,6 +1,6 @@
 use std::fmt;
 
-use super::location::Span;
+use crate::location::Span;
 
 #[derive(Debug, Clone)]
 pub struct Token {
