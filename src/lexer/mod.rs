@@ -3,6 +3,7 @@ pub mod token;
 pub use crate::location::{Location, Span};
 use crate::Compiler;
 use cursor::Cursor;
+pub use token::qualify_token;
 use token::*;
 
 #[derive(Debug)]
@@ -18,7 +19,7 @@ impl<'a> Iterator for TokenIter<'a> {
     }
 }
 
-pub fn tokenize(compiler: &mut Compiler) -> TokenIter {
+pub fn tokenize(compiler: &Compiler) -> TokenIter {
     tokenize_str(&compiler.code)
 }
 

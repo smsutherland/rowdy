@@ -50,10 +50,10 @@ impl Compiler {
 }
 
 pub fn run(config: Config) {
-    let mut compiler = Compiler::new(config).expect("TODO: handle errors here");
-    let tokens = lexer::tokenize(&mut compiler);
+    let compiler = Compiler::new(config).expect("TODO: handle errors here");
+    let tokens = lexer::tokenize(&compiler);
 
-    for t in tokens {
+    for t in tokens.map(|t| lexer::qualify_token(t, &compiler.code)) {
         println!("{t:?}");
     }
 

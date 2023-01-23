@@ -1,6 +1,5 @@
-use std::fmt;
-
 use crate::location::Span;
+use std::fmt;
 
 #[derive(Debug, Clone)]
 pub struct Token {
@@ -15,7 +14,6 @@ pub enum TokenType {
     SpecialChar(SpecialChar),
     IntLit,
     FloatLit,
-    Keyword(Keyword),
     End,
     Eof,
 }
@@ -28,7 +26,6 @@ impl fmt::Display for TokenType {
             Self::SpecialChar(_) => write!(f, "special char"),
             Self::IntLit => write!(f, "int lit"),
             Self::FloatLit => write!(f, "float lit"),
-            Self::Keyword(_) => write!(f, "keyword"),
             Self::End => write!(f, "end"),
             Self::Eof => write!(f, "eof"),
         }
@@ -65,4 +62,67 @@ pub enum Keyword {
     While,
     For,
     Return,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum QualifiedTokenType {
+    Symbol(String),
+    Operator(Operator),
+    SpecialChar(SpecialChar),
+    IntLit(i32),
+    FloatLit(f32),
+    Keyword(Keyword),
+    End,
+    Eof,
+}
+
+#[derive(Debug, Clone)]
+pub struct QualifiedToken {
+    pub typ: QualifiedTokenType,
+    pub span: Span,
+}
+
+pub fn qualify_token(token: Token, code: &str) -> QualifiedToken {
+    match token.typ {
+        TokenType::Symbol => QualifiedToken {
+            typ: QualifiedTokenType::Symbol(token.span.slice(code).to_string()),
+            span: token.span,
+        },
+        TokenType::Operator(op) => QualifiedToken {
+            typ: QualifiedTokenType::Operator(op),
+            span: token.span,
+        },
+        TokenType::SpecialChar(c) => QualifiedToken {
+            typ: QualifiedTokenType::SpecialChar(c),
+            span: token.span,
+        },
+        TokenType::IntLit => QualifiedToken {
+            typ: QualifiedTokenType::FloatLit(
+                token
+                    .span
+                    .slice(code)
+                    .parse()
+                    .expect("Failed to parse int lit"),
+            ),
+            span: token.span,
+        },
+        TokenType::FloatLit => QualifiedToken {
+            typ: QualifiedTokenType::FloatLit(
+                token
+                    .span
+                    .slice(code)
+                    .parse()
+                    .expect("Failed to parse float lit"),
+            ),
+            span: token.span,
+        },
+        TokenType::End => QualifiedToken {
+            typ: QualifiedTokenType::End,
+            span: token.span,
+        },
+        TokenType::Eof => QualifiedToken {
+            typ: QualifiedTokenType::Eof,
+            span: token.span,
+        },
+    }
 }
