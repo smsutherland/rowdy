@@ -1,8 +1,7 @@
 use std::iter::Peekable;
 
-use crate::lexer::token::{self, Token, TokenType};
+use crate::lexer::token::{self, QualifiedToken, QualifiedTokenType};
 use crate::lexer::Location;
-use crate::types::Type;
 
 pub trait ASTNode {
     fn loc(&self) -> Location;
@@ -58,10 +57,10 @@ macro_rules! match_type {
     };
 }
 
-pub fn parse_tokens(tokens: Vec<Token>) -> Ast {
-    let mut tokens: Peekable<_> = tokens.into_iter().peekable();
+pub fn parse_tokens(tokens: impl Iterator<Item = QualifiedToken>) -> Ast {
+    let mut tokens = tokens.peekable();
     let mut functions = Vec::new();
-    while tokens.peek().unwrap().typ != TokenType::Eof {
+    while tokens.peek().is_some() {
         functions.push(function(&mut tokens));
     }
     Program { functions }
@@ -70,7 +69,7 @@ pub fn parse_tokens(tokens: Vec<Token>) -> Ast {
 #[derive(Debug)]
 pub struct Function {
     loc: Location,
-    return_type: Type,
+    return_type: String,
     name: String,
     parameters: Vec<Declaration>,
     expr: BracedExpression,
@@ -84,11 +83,11 @@ impl<'a> ASTNode for Function {
 
 fn function<'a, I>(tokens: &mut Peekable<I>) -> Function
 where
-    I: Iterator<Item = Token<'a>>,
+    I: Iterator<Item = QualifiedToken>,
 {
-    use TokenType::*;
-    let loc = tokens.peek().unwrap().span;
-    let return_type = match_type!(tokens, DataType(t), t);
+    use QualifiedTokenType::*;
+    let loc = tokens.peek().unwrap().span.start;
+    let return_type = match_type!(tokens, Symbol(t), t);
     let name = match_type!(tokens, Symbol(s), s);
     match_type!(tokens, SpecialChar(token::SpecialChar::LParen));
     let mut parameters = Vec::new();
@@ -100,7 +99,7 @@ where
     let expr = braced_expression(tokens);
 
     Function {
-        loc: todo!(),
+        loc,
         return_type,
         name,
         parameters,
@@ -110,7 +109,7 @@ where
 
 #[derive(Debug)]
 pub struct Declaration {
-    typ: Type,
+    typ: String,
     name: String,
 }
 
@@ -122,10 +121,10 @@ impl ASTNode for Declaration {
 
 fn declaration<'a, I>(tokens: &mut Peekable<I>) -> Declaration
 where
-    I: Iterator<Item = Token<'a>>,
+    I: Iterator<Item = QualifiedToken>,
 {
-    let typ = match_type!(tokens, TokenType::DataType(x), x);
-    let name = match_type!(tokens, TokenType::Symbol(x), x);
+    let typ = match_type!(tokens, QualifiedTokenType::Symbol(x), x);
+    let name = match_type!(tokens, QualifiedTokenType::Symbol(x), x);
     Declaration { typ, name }
 }
 
@@ -142,9 +141,9 @@ impl ASTNode for BracedExpression {
 
 fn braced_expression<'a, I>(tokens: &mut Peekable<I>) -> BracedExpression
 where
-    I: Iterator<Item = Token<'a>>,
+    I: Iterator<Item = QualifiedToken>,
 {
-    use TokenType::*;
+    use QualifiedTokenType::*;
     match_type!(tokens, SpecialChar(token::SpecialChar::LBrace));
     let mut statements = Vec::new();
     while !match_type_peek!(tokens, SpecialChar(token::SpecialChar::RBrace)) {
@@ -169,23 +168,10 @@ impl ASTNode for Statement {
 
 fn statement<'a, I>(tokens: &mut Peekable<I>) -> Statement
 where
-    I: Iterator<Item = Token<'a>>,
+    I: Iterator<Item = QualifiedToken>,
 {
-    use TokenType::*;
-    if match_type_peek!(tokens, DataType(_)) {
-        // Declaration
-        let dec = declaration(tokens);
-        if match_type_peek!(tokens, Operator(token::Operator::Assign)) {
-            match_type!(tokens, Operator(token::Operator::Assign));
-            let expr = expression(tokens);
-            match_type!(tokens, End);
-            Statement::Declaration(dec, Some(expr))
-        } else {
-            match_type!(tokens, End);
-            Statement::Declaration(dec, None)
-        }
-    } else if match_type_peek!(tokens, Symbol(_)) {
-        // Assignment
+    use QualifiedTokenType::*;
+    if match_type_peek!(tokens, Symbol(_)) {
         let target = if let Symbol(s) = tokens.next().unwrap().typ {
             s
         } else {
@@ -193,8 +179,27 @@ where
                 std::hint::unreachable_unchecked();
             }
         };
-
-        if match_type_peek!(tokens, Operator(token::Operator::Assign)) {
+        if match_type_peek!(tokens, Symbol(_)) {
+            // Declaration
+            // let dec = declaration(tokens);
+            let name = if let Symbol(s) = tokens.next().unwrap().typ {
+                s
+            } else {
+                unsafe {
+                    std::hint::unreachable_unchecked();
+                }
+            };
+            let dec = Declaration { typ: target, name };
+            if match_type_peek!(tokens, Operator(token::Operator::Assign)) {
+                match_type!(tokens, Operator(token::Operator::Assign));
+                let expr = expression(tokens);
+                match_type!(tokens, End);
+                Statement::Declaration(dec, Some(expr))
+            } else {
+                match_type!(tokens, End);
+                Statement::Declaration(dec, None)
+            }
+        } else if match_type_peek!(tokens, Operator(token::Operator::Assign)) {
             // Assignment
             match_type!(tokens, Operator(token::Operator::Assign));
 
@@ -242,15 +247,15 @@ impl ASTNode for Expression {
 
 fn expression<'a, I>(tokens: &mut Peekable<I>) -> Expression
 where
-    I: Iterator<Item = Token<'a>>,
+    I: Iterator<Item = QualifiedToken>,
 {
     match tokens.next().unwrap().typ {
-        TokenType::SpecialChar(token::SpecialChar::LBrace) => {
+        QualifiedTokenType::SpecialChar(token::SpecialChar::LBrace) => {
             Expression::Braced(braced_expression(tokens))
         }
-        TokenType::IntLit(x) => Expression::IntLit(x),
-        TokenType::FloatLit(x) => Expression::FloatLit(x),
-        TokenType::Symbol(s) => Expression::Symbol(s),
+        QualifiedTokenType::IntLit(x) => Expression::IntLit(x),
+        QualifiedTokenType::FloatLit(x) => Expression::FloatLit(x),
+        QualifiedTokenType::Symbol(s) => Expression::Symbol(s),
         _ => panic!(),
     }
 }

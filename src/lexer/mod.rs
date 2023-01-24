@@ -6,7 +6,7 @@ use cursor::Cursor;
 pub use token::qualify_token;
 use token::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct UnqualifiedTokenIter<'a> {
     cursor: Cursor<'a>,
 }
@@ -19,7 +19,7 @@ impl<'a> Iterator for UnqualifiedTokenIter<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TokenIter<'a> {
     cursor: Cursor<'a>,
     code: &'a str,
