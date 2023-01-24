@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![warn(missing_debug_implementations)]
 
 mod lexer;
 mod location;
@@ -64,7 +65,7 @@ pub fn run(config: Config) {
 #[test]
 fn compile_testry() {
     let config = Config {
-        source: Source::File("./test.ry".into())
+        source: Source::File("./test.ry".into()),
     };
     run(config);
 }

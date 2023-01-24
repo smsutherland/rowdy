@@ -1,9 +1,9 @@
 mod cursor;
 pub mod token;
-pub use crate::location::{Location, Span};
+use crate::location::{Location, Span};
 use crate::Compiler;
 use cursor::Cursor;
-pub use token::qualify_token;
+use token::qualify_token;
 use token::*;
 
 #[derive(Debug, Clone)]
@@ -23,6 +23,12 @@ impl<'a> Iterator for UnqualifiedTokenIter<'a> {
 pub struct TokenIter<'a> {
     cursor: Cursor<'a>,
     code: &'a str,
+}
+
+impl<'a> TokenIter<'a> {
+    pub fn is_empty() -> bool {
+        todo!()
+    }
 }
 
 impl<'a> Iterator for TokenIter<'a> {
