@@ -1,6 +1,6 @@
 use std::{ffi::OsString, fmt};
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq, Ord)]
 pub struct Location {
     pub line: usize,
     pub col: usize,
@@ -32,6 +32,12 @@ impl Location {
             file: source,
             loc: self,
         }
+    }
+}
+
+impl PartialOrd for Location {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.char_num.partial_cmp(&other.char_num)
     }
 }
 
@@ -100,5 +106,11 @@ impl Span {
 
     pub fn slice<'b>(&self, s: &'b str) -> &'b str {
         &s[self.start.char_num..=self.end.char_num]
+    }
+
+    pub fn combine(&self, other: &Self) -> Self {
+        let start = self.start.min(other.start);
+        let end = self.end.max(other.end);
+        Self { start, end }
     }
 }
