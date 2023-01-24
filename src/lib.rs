@@ -53,7 +53,7 @@ pub fn run(config: Config) {
     let compiler = Compiler::new(config).expect("TODO: handle errors here");
     let tokens = lexer::tokenize(&compiler);
 
-    for t in tokens.map(|t| lexer::qualify_token(t, &compiler.code)) {
+    for t in tokens {
         println!("{t:?}");
     }
 

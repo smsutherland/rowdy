@@ -7,15 +7,29 @@ pub use token::qualify_token;
 use token::*;
 
 #[derive(Debug)]
-pub struct TokenIter<'a> {
+pub struct UnqualifiedTokenIter<'a> {
     cursor: Cursor<'a>,
 }
 
-impl<'a> Iterator for TokenIter<'a> {
+impl<'a> Iterator for UnqualifiedTokenIter<'a> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
         next_token(&mut self.cursor)
+    }
+}
+
+#[derive(Debug)]
+pub struct TokenIter<'a> {
+    cursor: Cursor<'a>,
+    code: &'a str,
+}
+
+impl<'a> Iterator for TokenIter<'a> {
+    type Item = QualifiedToken;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        Some(qualify_token(next_token(&mut self.cursor)?, self.code))
     }
 }
 
@@ -25,7 +39,19 @@ pub fn tokenize(compiler: &Compiler) -> TokenIter {
 
 pub fn tokenize_str(input: &str) -> TokenIter {
     let cursor = Cursor::new(input);
-    TokenIter { cursor }
+    TokenIter {
+        cursor,
+        code: input,
+    }
+}
+
+pub fn tokenize_unqualified(compiler: &Compiler) -> UnqualifiedTokenIter {
+    tokenize_str_unqualified(&compiler.code)
+}
+
+pub fn tokenize_str_unqualified(input: &str) -> UnqualifiedTokenIter {
+    let cursor = Cursor::new(input);
+    UnqualifiedTokenIter { cursor }
 }
 
 fn next_token(cursor: &mut Cursor) -> Option<Token> {
