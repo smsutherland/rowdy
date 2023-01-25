@@ -3,5 +3,5 @@ int main(int y) {
     x = 5.1;
     bool z = false;
     print(x, y);
-    print(y);
+    print(y,);
 }

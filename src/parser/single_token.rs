@@ -34,16 +34,10 @@ impl Spanned for Symbol {
     }
 }
 
-macro_rules! Token {
-    [,] => {
-        $self::Comma
-    };
-}
-
 macro_rules! special_char_node {
     ($name:ident) => {
         #[derive(Debug)]
-        struct $name {
+        pub struct $name {
             span: Span,
         }
 

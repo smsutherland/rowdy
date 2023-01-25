@@ -1,6 +1,6 @@
 //! Tokens similar to that of `lexer::token` but aranged into separate types rather than an enum.
 
-use super::{parse, single_token::Symbol, try_parse, Parse, ParseError, Result, Spanned};
+use super::{parse, single_token::*, try_parse, Parse, ParseError, Result, Spanned};
 use crate::{
     lexer::{
         token::{self, QualifiedToken as Token, QualifiedTokenType as TokenType},
@@ -192,26 +192,15 @@ impl Parse for Statement {
             }) = tokens.next() else {return Err(ParseError::UnexpectedToken)};
             let mut exprs = Vec::new();
             loop {
-                if let Some(Token {
-                    typ: TokenType::SpecialChar(token::SpecialChar::RParen),
-                    ..
-                }) = tokens.clone().next()
-                {
+                if try_parse::<RParen>(tokens).is_ok() {
                     break;
                 }
                 exprs.push(parse(tokens)?);
-                if let Some(Token {
-                    typ: TokenType::SpecialChar(token::SpecialChar::Comma),
-                    ..
-                }) = tokens.clone().next()
-                {
-                    tokens.next();
+                if try_parse::<Comma>(tokens).is_err() {
+                    parse::<RParen>(tokens)?;
+                    break;
                 }
             }
-            let Some(Token {
-                typ: TokenType::SpecialChar(token::SpecialChar::RParen),
-                ..
-            }) = tokens.next() else {return Err(ParseError::UnexpectedToken)};
             let Some(Token {
                 typ: TokenType::End,
                 ..
