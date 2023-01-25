@@ -108,7 +108,7 @@ impl Span {
         &s[self.start.char_num..=self.end.char_num]
     }
 
-    pub fn combine(&self, other: &Self) -> Self {
+    pub fn combine(&self, other: Self) -> Self {
         let start = self.start.min(other.start);
         let end = self.end.max(other.end);
         Self { start, end }
