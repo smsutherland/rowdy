@@ -88,15 +88,13 @@ impl Parse for Function {
             return Err(ParseError::UnexpectedToken);
         };
         let mut parameters = Vec::new();
-        while {
-            match tokens.clone().next() {
-                Some(Token {
-                    typ: TokenType::Symbol(_),
-                    ..
-                }) => true,
-                _ => false,
-            }
-        } {
+        while matches!(
+            tokens.clone().next(),
+            Some(Token {
+                typ: TokenType::Symbol(_),
+                ..
+            })
+        ) {
             parameters.push(parse(tokens)?);
         }
         let Some(Token {

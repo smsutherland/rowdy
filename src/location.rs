@@ -1,6 +1,6 @@
 use std::{ffi::OsString, fmt};
 
-#[derive(Clone, Copy, PartialEq, Eq, Ord)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Location {
     pub line: usize,
     pub col: usize,
@@ -38,6 +38,12 @@ impl Location {
 impl PartialOrd for Location {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.char_num.partial_cmp(&other.char_num)
+    }
+}
+
+impl Ord for Location {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.char_num.cmp(&other.char_num)
     }
 }
 
