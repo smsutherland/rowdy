@@ -78,7 +78,7 @@ pub struct Function {
 
 impl Parse for Function {
     fn parse(tokens: &mut TokenIter) -> Result<Self> {
-        let return_type = Symbol::parse(tokens)?;
+        let return_type: Symbol = parse(tokens)?;
         let name = parse(tokens)?;
 
         let Some(Token {
@@ -99,6 +99,12 @@ impl Parse for Function {
         } {
             parameters.push(parse(tokens)?);
         }
+        let Some(Token {
+            typ: TokenType::SpecialChar(token::SpecialChar::RParen),
+            ..
+        }) = tokens.next() else {
+            return Err(ParseError::UnexpectedToken);
+        };
         let expr: BracedExpression = parse(tokens)?;
 
         Ok(Function {

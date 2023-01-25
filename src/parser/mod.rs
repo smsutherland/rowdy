@@ -12,8 +12,7 @@ pub type Ast = Program;
 pub fn parse_tokens(tokens: TokenIter) -> Ast {
     let mut tokens = tokens;
     let mut functions = Vec::new();
-    // while let Ok(func) = parse(&mut tokens) {
-    while let func = parse(&mut tokens).unwrap() {
+    while let Ok(func) = parse(&mut tokens) {
         functions.push(func);
     }
 
