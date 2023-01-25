@@ -148,6 +148,8 @@ impl Parse for Statement {
                 ..
             }) = tokens.clone().next()
             {
+                // Declaration w/ assignment
+                tokens.next();
                 let expr = parse(tokens)?;
                 let Some(Token {
                         typ: TokenType::End,
