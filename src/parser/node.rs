@@ -1,6 +1,7 @@
 //! Tokens similar to that of `lexer::token` but aranged into separate types rather than an enum.
 
 use super::{parse, single_token::*, try_parse, Parse, ParseError, Result, Spanned};
+use crate::Token;
 use crate::{
     lexer::{
         token::{self, QualifiedToken as Token, QualifiedTokenType as TokenType},
@@ -23,28 +24,12 @@ impl Parse for Function {
         let return_type: Symbol = parse(tokens)?;
         let name = parse(tokens)?;
 
-        let Some(Token {
-            typ: TokenType::SpecialChar(token::SpecialChar::LParen),
-            ..
-        }) = tokens.next() else {
-            return Err(ParseError::UnexpectedToken);
-        };
+        parse::<LParen>(tokens)?;
         let mut parameters = Vec::new();
-        while matches!(
-            tokens.clone().next(),
-            Some(Token {
-                typ: TokenType::Symbol(_),
-                ..
-            })
-        ) {
-            parameters.push(parse(tokens)?);
+        while let Ok(dec) = try_parse(tokens) {
+            parameters.push(dec);
         }
-        let Some(Token {
-            typ: TokenType::SpecialChar(token::SpecialChar::RParen),
-            ..
-        }) = tokens.next() else {
-            return Err(ParseError::UnexpectedToken);
-        };
+        parse::<RParen>(tokens)?;
         let expr: BracedExpression = parse(tokens)?;
 
         Ok(Function {
@@ -96,26 +81,15 @@ pub struct BracedExpression {
 
 impl Parse for BracedExpression {
     fn parse(tokens: &mut TokenIter) -> Result<Self> {
-        let Some(Token {
-            typ: TokenType::SpecialChar(token::SpecialChar::LBrace),
-            span: start_span,
-        }) = tokens.next() else {
-            return Err(ParseError::UnexpectedToken);
-        };
+        let start_brace: LBrace = parse(tokens)?;
         let mut statements = Vec::new();
         while let Ok(statement) = try_parse(tokens) {
             statements.push(statement);
         }
-        let Some(Token {
-            typ: TokenType::SpecialChar(token::SpecialChar::RBrace),
-            span: end_span,
-        }) = tokens.next() else {
-            return Err(ParseError::UnexpectedToken);
-        };
-
+        let end_brace: RBrace = parse(tokens)?;
         Ok(BracedExpression {
             statements,
-            span: start_span.combine(end_span),
+            span: start_brace.span().combine(end_brace.span()),
         })
     }
 }
@@ -143,68 +117,36 @@ impl Parse for Statement {
                 typ: first_symbol,
                 name: second_symbol,
             };
-            if let Some(Token {
-                typ: TokenType::Operator(token::Operator::Assign),
-                ..
-            }) = tokens.clone().next()
-            {
+            if try_parse::<Token![=]>(tokens).is_ok() {
                 // Declaration w/ assignment
-                tokens.next();
                 let expr = parse(tokens)?;
-                let Some(Token {
-                        typ: TokenType::End,
-                        ..
-                    }) = tokens.next() else {
-                        return Err(ParseError::UnexpectedToken);
-                    };
+                parse::<Token![;]>(tokens)?;
                 Ok(Statement::Declaration(dec, Some(expr)))
             } else {
-                let Some(Token {
-                        typ: TokenType::End,
-                        ..
-                    }) = tokens.next() else {
-                        return Err(ParseError::UnexpectedToken);
-                    };
+                parse::<Token![;]>(tokens)?;
                 Ok(Statement::Declaration(dec, None))
             }
-        } else if let Some(Token {
-            typ: TokenType::Operator(token::Operator::Assign),
-            ..
-        }) = tokens.clone().next()
-        {
+        } else if try_parse::<Token![=]>(tokens).is_ok() {
             // Assignment
-            tokens.next();
-
             let expr = parse(tokens)?;
-            let Some(Token {
-                typ: TokenType::End,
-                ..
-            }) = tokens.next() else {
-                return Err(ParseError::UnexpectedToken)
-            };
+            parse::<Token![;]>(tokens)?;
 
             Ok(Statement::Assignment(first_symbol, expr))
         } else {
             // Function call
-            let Some(Token {
-                typ: TokenType::SpecialChar(token::SpecialChar::LParen),
-                ..
-            }) = tokens.next() else {return Err(ParseError::UnexpectedToken)};
+            parse::<LParen>(tokens)?;
             let mut exprs = Vec::new();
             loop {
                 if try_parse::<RParen>(tokens).is_ok() {
                     break;
                 }
                 exprs.push(parse(tokens)?);
-                if try_parse::<Comma>(tokens).is_err() {
+                if try_parse::<Token![,]>(tokens).is_err() {
                     parse::<RParen>(tokens)?;
                     break;
                 }
             }
-            let Some(Token {
-                typ: TokenType::End,
-                ..
-            }) = tokens.next() else {return Err(ParseError::UnexpectedToken)};
+            parse::<Token![;]>(tokens)?;
             Ok(Statement::FunctionCall(first_symbol, exprs))
         }
     }
@@ -243,7 +185,7 @@ impl Parse for Expression {
                 typ: TokenType::Symbol(s),
                 ..
             } => Ok(Expression::Symbol(s)),
-            _ => panic!(),
+            _ => Err(ParseError::UnexpectedToken),
         }
     }
 }
