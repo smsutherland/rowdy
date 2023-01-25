@@ -1,5 +1,6 @@
 //! Tokens similar to that of `lexer::token` but aranged into separate types rather than an enum.
 
+use super::{parse, single_token::Symbol, try_parse, Parse, ParseError, Result, Spanned};
 use crate::{
     lexer::{
         token::{self, QualifiedToken as Token, QualifiedTokenType as TokenType},
@@ -7,65 +8,6 @@ use crate::{
     },
     location::Span,
 };
-
-type Result<T> = std::result::Result<T, ParseError>;
-
-#[derive(Debug)]
-pub enum ParseError {
-    UnexpectedToken,
-}
-
-pub trait Parse: Sized {
-    fn parse(tokens: &mut TokenIter) -> Result<Self>;
-
-    fn try_parse(tokens: &mut TokenIter) -> Result<Self> {
-        let mut tokens_clone = tokens.clone();
-        let result = Self::parse(&mut tokens_clone)?;
-        *tokens = tokens_clone;
-        Ok(result)
-    }
-}
-
-#[inline]
-pub fn parse<T: Parse>(tokens: &mut TokenIter) -> Result<T> {
-    T::parse(tokens)
-}
-
-#[inline]
-pub fn try_parse<T: Parse>(tokens: &mut TokenIter) -> Result<T> {
-    T::try_parse(tokens)
-}
-
-pub trait Spanned {
-    fn span(&self) -> Span;
-}
-
-#[derive(Debug)]
-pub struct Symbol {
-    pub text: String,
-    pub span: Span,
-}
-
-impl Parse for Symbol {
-    fn parse(tokens: &mut TokenIter) -> Result<Self> {
-        if let Some(Token {
-            typ: TokenType::Symbol(text),
-            span,
-        }) = tokens.next()
-        {
-            Ok(Self { text, span })
-        } else {
-            Err(ParseError::UnexpectedToken)
-        }
-    }
-}
-
-impl Spanned for Symbol {
-    #[inline]
-    fn span(&self) -> Span {
-        self.span
-    }
-}
 
 #[derive(Debug)]
 pub struct Function {
@@ -116,7 +58,6 @@ impl Parse for Function {
 }
 
 impl Spanned for Function {
-    #[inline]
     fn span(&self) -> Span {
         self.span
     }
@@ -142,7 +83,6 @@ impl Parse for Declaration {
 }
 
 impl Spanned for Declaration {
-    #[inline]
     fn span(&self) -> Span {
         self.span
     }
