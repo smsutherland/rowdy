@@ -1,4 +1,4 @@
-use crate::{lexer::TokenIter, location::Span};
+use crate::{lexer::token::QualifiedTokenType as TokenType, lexer::TokenIter, location::Span};
 use node::Function;
 
 mod node;
@@ -14,8 +14,8 @@ pub type Ast = Program;
 pub fn parse_tokens(tokens: TokenIter) -> Ast {
     let mut tokens = tokens;
     let mut functions = Vec::new();
-    while let Ok(func) = parse(&mut tokens) {
-        functions.push(func);
+    while !tokens.is_empty() {
+        functions.push(parse(&mut tokens).unwrap());
     }
 
     Program { functions }
@@ -25,7 +25,11 @@ type Result<T> = std::result::Result<T, ParseError>;
 
 #[derive(Debug)]
 pub enum ParseError {
-    UnexpectedToken,
+    UnexpectedToken {
+        expected: &'static str,
+        got: TokenType,
+    },
+    OutOfTokens,
 }
 
 pub trait Parse: Sized {

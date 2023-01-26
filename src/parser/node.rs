@@ -168,7 +168,7 @@ pub enum Expression {
 
 impl Parse for Expression {
     fn parse(tokens: &mut TokenIter) -> Result<Self> {
-        match tokens.next().ok_or(ParseError::UnexpectedToken)? {
+        match tokens.next().ok_or(ParseError::OutOfTokens)? {
             Token {
                 typ: TokenType::SpecialChar(token::SpecialChar::LBrace),
                 ..
@@ -185,7 +185,10 @@ impl Parse for Expression {
                 typ: TokenType::Symbol(s),
                 ..
             } => Ok(Expression::Symbol(s)),
-            _ => Err(ParseError::UnexpectedToken),
+            other => Err(ParseError::UnexpectedToken {
+                expected: "LBrace, IntLit, FloatLit, Symbol",
+                got: other.typ,
+            }),
         }
     }
 }

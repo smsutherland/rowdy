@@ -11,6 +11,12 @@ pub struct UnqualifiedTokenIter<'a> {
     cursor: Cursor<'a>,
 }
 
+impl<'a> UnqualifiedTokenIter<'a> {
+    pub fn is_empty(&self) -> bool {
+        self.clone().next().is_none()
+    }
+}
+
 impl<'a> Iterator for UnqualifiedTokenIter<'a> {
     type Item = Token;
 
@@ -26,8 +32,8 @@ pub struct TokenIter<'a> {
 }
 
 impl<'a> TokenIter<'a> {
-    pub fn is_empty() -> bool {
-        todo!()
+    pub fn is_empty(&self) -> bool {
+        self.clone().next().is_none()
     }
 }
 

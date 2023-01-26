@@ -19,14 +19,16 @@ pub struct Symbol {
 
 impl Parse for Symbol {
     fn parse(tokens: &mut TokenIter) -> Result<Self> {
-        if let Some(Token {
-            typ: TokenType::Symbol(text),
-            span,
-        }) = tokens.next()
-        {
-            Ok(Self { text, span })
-        } else {
-            Err(ParseError::UnexpectedToken)
+        match tokens.next() {
+            Some(Token {
+                typ: TokenType::Symbol(text),
+                span,
+            }) => Ok(Self { text, span }),
+            Some(other) => Err(ParseError::UnexpectedToken {
+                expected: "Symbol",
+                got: other.typ,
+            }),
+            None => Err(ParseError::OutOfTokens),
         }
     }
 }
@@ -60,14 +62,16 @@ macro_rules! make_node {
 
         impl Parse for $name {
             fn parse(tokens: &mut TokenIter) -> Result<Self> {
-                if let Some(Token {
-                    typ: TokenType::$kind($kind::$name),
-                    span,
-                }) = tokens.next()
-                {
-                    Ok(Self { span })
-                } else {
-                    Err(ParseError::UnexpectedToken)
+                match tokens.next() {
+                    Some(Token {
+                        typ: TokenType::$kind($kind::$name),
+                        span,
+                    }) => Ok(Self { span }),
+                    Some(other) => Err(ParseError::UnexpectedToken {
+                        expected: stringify!($name),
+                        got: other.typ,
+                    }),
+                    None => Err(ParseError::OutOfTokens),
                 }
             }
         }
@@ -101,14 +105,16 @@ pub struct End {
 
 impl Parse for End {
     fn parse(tokens: &mut TokenIter) -> Result<Self> {
-        if let Some(Token {
-            typ: TokenType::End,
-            span,
-        }) = tokens.next()
-        {
-            Ok(Self { span })
-        } else {
-            Err(ParseError::UnexpectedToken)
+        match tokens.next() {
+            Some(Token {
+                typ: TokenType::End,
+                span,
+            }) => Ok(Self { span }),
+            Some(other) => Err(ParseError::UnexpectedToken {
+                expected: "End",
+                got: other.typ,
+            }),
+            None => Err(ParseError::OutOfTokens),
         }
     }
 }
@@ -142,14 +148,16 @@ pub struct IntLit {
 
 impl Parse for IntLit {
     fn parse(tokens: &mut TokenIter) -> Result<Self> {
-        if let Some(Token {
-            typ: TokenType::IntLit(value),
-            span,
-        }) = tokens.next()
-        {
-            Ok(Self { span, value })
-        } else {
-            Err(ParseError::UnexpectedToken)
+        match tokens.next() {
+            Some(Token {
+                typ: TokenType::IntLit(value),
+                span,
+            }) => Ok(Self { span, value }),
+            Some(other) => Err(ParseError::UnexpectedToken {
+                expected: "IntLit",
+                got: other.typ,
+            }),
+            None => Err(ParseError::OutOfTokens),
         }
     }
 }
@@ -168,14 +176,16 @@ pub struct FloatLit {
 
 impl Parse for FloatLit {
     fn parse(tokens: &mut TokenIter) -> Result<Self> {
-        if let Some(Token {
-            typ: TokenType::FloatLit(value),
-            span,
-        }) = tokens.next()
-        {
-            Ok(Self { span, value })
-        } else {
-            Err(ParseError::UnexpectedToken)
+        match tokens.next() {
+            Some(Token {
+                typ: TokenType::FloatLit(value),
+                span,
+            }) => Ok(Self { span, value }),
+            Some(other) => Err(ParseError::UnexpectedToken {
+                expected: "IntLit",
+                got: other.typ,
+            }),
+            None => Err(ParseError::OutOfTokens),
         }
     }
 }

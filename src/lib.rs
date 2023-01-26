@@ -54,9 +54,9 @@ pub fn run(config: Config) {
     let compiler = Compiler::new(config).expect("TODO: handle errors here");
     let tokens = lexer::tokenize(&compiler);
 
-    for t in tokens.clone() {
-        println!("{t:?}");
-    }
+    // for t in tokens.clone() {
+    //     println!("{t:?}");
+    // }
 
     let ast = parser::parse_tokens(tokens);
     println!("{ast:#?}");
