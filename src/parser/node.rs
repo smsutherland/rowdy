@@ -13,7 +13,7 @@ use crate::{
 #[derive(Debug)]
 pub struct Function {
     span: Span,
-    return_type: Symbol,
+    return_type: Type,
     name: Symbol,
     parameters: Vec<Declaration>,
     expr: BracedExpression,
@@ -21,7 +21,7 @@ pub struct Function {
 
 impl Parse for Function {
     fn parse(tokens: &mut TokenIter) -> Result<Self> {
-        let return_type: Symbol = parse(tokens)?;
+        let return_type: Type = parse(tokens)?;
         let name = parse(tokens)?;
 
         parse::<LParen>(tokens)?;
@@ -33,7 +33,7 @@ impl Parse for Function {
         let expr: BracedExpression = parse(tokens)?;
 
         Ok(Function {
-            span: return_type.span.combine(expr.span()),
+            span: return_type.span().combine(expr.span()),
             return_type,
             name,
             parameters,
@@ -51,16 +51,16 @@ impl Spanned for Function {
 #[derive(Debug)]
 pub struct Declaration {
     span: Span,
-    typ: Symbol,
+    typ: Type,
     name: Symbol,
 }
 
 impl Parse for Declaration {
     fn parse(tokens: &mut TokenIter) -> Result<Self> {
-        let typ = Symbol::parse(tokens)?;
-        let name = Symbol::parse(tokens)?;
+        let typ: Type = parse(tokens)?;
+        let name: Symbol = parse(tokens)?;
         Ok(Declaration {
-            span: typ.span.combine(name.span),
+            span: typ.span().combine(name.span),
             typ,
             name,
         })
@@ -114,7 +114,7 @@ impl Parse for Statement {
             // Declaration
             let dec = Declaration {
                 span: first_symbol.span.combine(second_symbol.span),
-                typ: first_symbol,
+                typ: first_symbol.into(),
                 name: second_symbol,
             };
             if try_parse::<Token![=]>(tokens).is_ok() {
@@ -196,5 +196,28 @@ impl Parse for Expression {
 impl Spanned for Expression {
     fn span(&self) -> Span {
         todo!()
+    }
+}
+
+#[derive(Debug)]
+struct Type {
+    symbol: Symbol,
+}
+
+impl Parse for Type {
+    fn parse(tokens: &mut TokenIter) -> Result<Self> {
+        Ok(parse::<Symbol>(tokens)?.into())
+    }
+}
+
+impl From<Symbol> for Type {
+    fn from(symbol: Symbol) -> Self {
+        Self { symbol }
+    }
+}
+
+impl Spanned for Type {
+    fn span(&self) -> Span {
+        self.symbol.span
     }
 }
