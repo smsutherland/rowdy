@@ -7,7 +7,7 @@ pub struct Location {
     pub char_num: usize,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Source {
     File(OsString),
     Anonymous,
