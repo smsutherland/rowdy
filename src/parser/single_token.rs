@@ -1,6 +1,9 @@
 use crate::{
     lexer::{
-        token::{Operator, QualifiedToken as Token, QualifiedTokenType as TokenType, SpecialChar},
+        token::{
+            Keyword, Operator, QualifiedToken as Token, QualifiedTokenType as TokenType,
+            SpecialChar,
+        },
         TokenIter,
     },
     location::Span,
@@ -130,3 +133,67 @@ operator_node! {SubAssign}
 operator_node! {Decrement}
 operator_node! {Assign}
 operator_node! {Equals}
+
+#[derive(Debug)]
+pub struct IntLit {
+    span: Span,
+    value: i32,
+}
+
+impl Parse for IntLit {
+    fn parse(tokens: &mut TokenIter) -> Result<Self> {
+        if let Some(Token {
+            typ: TokenType::IntLit(value),
+            span,
+        }) = tokens.next()
+        {
+            Ok(Self { span, value })
+        } else {
+            Err(ParseError::UnexpectedToken)
+        }
+    }
+}
+
+impl Spanned for IntLit {
+    fn span(&self) -> Span {
+        self.span
+    }
+}
+
+#[derive(Debug)]
+pub struct FloatLit {
+    span: Span,
+    value: f32,
+}
+
+impl Parse for FloatLit {
+    fn parse(tokens: &mut TokenIter) -> Result<Self> {
+        if let Some(Token {
+            typ: TokenType::FloatLit(value),
+            span,
+        }) = tokens.next()
+        {
+            Ok(Self { span, value })
+        } else {
+            Err(ParseError::UnexpectedToken)
+        }
+    }
+}
+
+impl Spanned for FloatLit {
+    fn span(&self) -> Span {
+        self.span
+    }
+}
+
+macro_rules! keyword_node {
+    ($name:ident) => {
+        make_node! {Keyword::$name}
+    };
+}
+
+keyword_node! {If}
+keyword_node! {Else}
+keyword_node! {While}
+keyword_node! {For}
+keyword_node! {Return}
