@@ -4,7 +4,7 @@
 mod lexer;
 mod location;
 mod parser;
-mod types;
+mod visit;
 
 use location::Source;
 use std::io::Read;
