@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 #![warn(missing_debug_implementations)]
 
+mod ast;
 mod lexer;
 mod location;
 mod parser;
