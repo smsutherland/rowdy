@@ -5,12 +5,13 @@ mod ast;
 mod lexer;
 mod location;
 mod parser;
+mod type_checking;
 mod visit;
 
 use location::Source;
 use std::io::Read;
-
-use crate::visit::{TypeChecker, Visit};
+use type_checking::TypeChecker;
+use visit::Visit;
 
 #[derive(Debug)]
 pub struct Config {
