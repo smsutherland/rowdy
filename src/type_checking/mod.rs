@@ -2,6 +2,12 @@ use crate::ast::*;
 use crate::visit::Visit;
 use std::collections::HashMap;
 
+pub fn type_check(ast: &mut Ast) {
+    let mut checker = TypeChecker::default();
+    checker.visit(ast);
+    println!("{checker:?}");
+}
+
 // 1. go through and find all type definnitions
 // 2. give each fully qualified type an id
 // 2.1. primitive types already have a type id
@@ -14,7 +20,7 @@ struct FunctionInfo {
 }
 
 #[derive(Debug, Default)]
-pub struct TypeChecker {
+struct TypeChecker {
     functions: HashMap<String, FunctionInfo>,
 }
 

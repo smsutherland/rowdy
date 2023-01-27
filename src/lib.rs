@@ -10,8 +10,7 @@ mod visit;
 
 use location::Source;
 use std::io::Read;
-use type_checking::TypeChecker;
-use visit::Visit;
+use type_checking::type_check;
 
 #[derive(Debug)]
 pub struct Config {
@@ -65,9 +64,7 @@ pub fn run(config: Config) {
     let mut ast = parser::parse_tokens(tokens);
     // println!("{ast:#?}");
 
-    let mut type_checker = TypeChecker::default();
-    type_checker.visit(&mut ast);
-    println!("{type_checker:?}")
+    type_check(&mut ast);
 }
 
 #[test]
