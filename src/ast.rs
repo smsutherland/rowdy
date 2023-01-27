@@ -5,6 +5,13 @@ pub trait Spanned {
 }
 
 #[derive(Debug)]
+pub struct Program {
+    pub functions: Vec<Function>,
+}
+
+pub type Ast = Program;
+
+#[derive(Debug)]
 pub struct Function {
     pub span: Span,
     pub return_type: Type,
@@ -73,7 +80,7 @@ impl Spanned for Expression {
 
 #[derive(Debug)]
 pub struct Type {
-    symbol: Symbol,
+    pub symbol: Symbol,
 }
 
 impl From<Symbol> for Type {

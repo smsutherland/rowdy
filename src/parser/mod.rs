@@ -5,21 +5,8 @@ use crate::{
     Token,
 };
 
-#[derive(Debug)]
-pub struct Program {
-    functions: Vec<Function>,
-}
-
-pub type Ast = Program;
-
-pub fn parse_tokens(tokens: TokenIter) -> Ast {
-    let mut tokens = tokens;
-    let mut functions = Vec::new();
-    while !tokens.is_empty() {
-        functions.push(parse(&mut tokens).unwrap());
-    }
-
-    Program { functions }
+pub fn parse_tokens(mut tokens: TokenIter) -> Ast {
+    parse(&mut tokens).unwrap()
 }
 
 type Result<T> = std::result::Result<T, ParseError>;
@@ -52,6 +39,16 @@ pub fn parse<T: Parse>(tokens: &mut TokenIter) -> Result<T> {
 #[inline]
 pub fn try_parse<T: Parse>(tokens: &mut TokenIter) -> Result<T> {
     T::try_parse(tokens)
+}
+
+impl Parse for Ast {
+    fn parse(tokens: &mut TokenIter) -> Result<Self> {
+        let mut functions = Vec::new();
+        while !tokens.is_empty() {
+            functions.push(parse(tokens)?);
+        }
+        Ok(Self { functions })
+    }
 }
 
 impl Parse for Function {
