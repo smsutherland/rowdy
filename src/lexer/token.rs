@@ -122,7 +122,7 @@ pub fn qualify_token(token: Token, code: &str) -> QualifiedToken {
             span: token.span,
         },
         TokenType::IntLit => QualifiedToken {
-            typ: QualifiedTokenType::FloatLit(
+            typ: QualifiedTokenType::IntLit(
                 token
                     .span
                     .slice(code)

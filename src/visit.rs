@@ -1,3 +1,5 @@
 pub trait Visit<AST> {
-    fn visit(&mut self, node: &mut AST);
+    type Output;
+
+    fn visit(&mut self, node: &AST) -> Self::Output;
 }
