@@ -83,7 +83,17 @@ impl Visit<Function> for TypeChecker {
                 .insert(param.name.text.clone(), param_type_id);
         }
 
-        for statement in &node.expr.statements {
+        self.visit(&node.expr);
+
+        println!("{:?}", self.symbol_table);
+    }
+}
+
+impl Visit<BracedExpression> for TypeChecker {
+    type Output = TypeID;
+
+    fn visit(&mut self, node: &BracedExpression) -> TypeID {
+        for statement in &node.statements {
             println!("{statement:#?}");
             match statement {
                 Statement::Declaration(declaration, None) => {
@@ -106,8 +116,7 @@ impl Visit<Function> for TypeChecker {
                 Statement::FunctionCall(name, params) => todo!(),
             }
         }
-
-        println!("{:?}", self.symbol_table);
+        return 0;
     }
 }
 
@@ -116,7 +125,7 @@ impl Visit<Expression> for TypeChecker {
 
     fn visit(&mut self, node: &Expression) -> TypeID {
         match node {
-            Expression::Braced(_) => todo!(),
+            Expression::Braced(braced_expr) => self.visit(braced_expr),
             Expression::IntLit(_) => self.type_name_lookup("int"),
             Expression::FloatLit(_) => self.type_name_lookup("float"),
             Expression::Symbol(symbol) => *self.symbol_table.get(symbol).unwrap(),
