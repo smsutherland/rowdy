@@ -2,6 +2,7 @@
 #![warn(missing_debug_implementations)]
 
 mod ast;
+mod diagnostic;
 mod lexer;
 mod location;
 mod parser;
@@ -61,10 +62,10 @@ pub fn run(config: Config) {
     //     println!("{t:?}");
     // }
 
-    let mut ast = parser::parse_tokens(tokens);
+    let mut ast = parser::parse_tokens(tokens, &compiler);
     // println!("{ast:#?}");
 
-    type_check(&mut ast);
+    type_check(&mut ast, &compiler);
 }
 
 #[test]

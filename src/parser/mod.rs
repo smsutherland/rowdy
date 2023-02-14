@@ -2,10 +2,10 @@ use crate::{
     ast::*,
     lexer::token::{QualifiedToken as Token, QualifiedTokenType as TokenType},
     lexer::TokenIter,
-    Token,
+    Compiler, Token,
 };
 
-pub fn parse_tokens(mut tokens: TokenIter) -> Ast {
+pub fn parse_tokens(mut tokens: TokenIter, _compiler: &Compiler) -> Ast {
     parse(&mut tokens).unwrap()
 }
 

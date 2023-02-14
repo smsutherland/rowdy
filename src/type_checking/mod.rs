@@ -1,8 +1,8 @@
-use crate::ast::*;
 use crate::visit::Visit;
+use crate::{ast::*, Compiler};
 use std::collections::HashMap;
 
-pub fn type_check(ast: &mut Ast) {
+pub fn type_check(ast: &mut Ast, _compiler: &Compiler) {
     let mut checker = TypeChecker::default();
     checker.visit(ast);
     println!("{checker:?}");
@@ -113,10 +113,10 @@ impl Visit<BracedExpression> for TypeChecker {
                         Some(self.visit(expression))
                     )
                 }
-                Statement::FunctionCall(name, params) => todo!(),
+                Statement::FunctionCall(_name, _params) => todo!(),
             }
         }
-        return 0;
+        0
     }
 }
 
