@@ -31,5 +31,5 @@ pub fn print_error(span: Span, message: String, compiler: &Compiler) {
         level: Level::Error,
     };
 
-    println!("{diagnostic}");
+    eprintln!("{diagnostic}");
 }
