@@ -60,21 +60,37 @@ pub enum Statement {
 
 impl Spanned for Statement {
     fn span(&self) -> Span {
-        todo!()
+        match self {
+            Statement::Declaration(decl, Some(expr)) => decl.span.combine(expr.span()),
+            Statement::Declaration(decl, None) => decl.span,
+            Statement::Assignment(symbol, expr) => symbol.span.combine(expr.span()),
+            Statement::FunctionCall(symbol, exprs) => {
+                let mut span = symbol.span;
+                if let Some(last) = exprs.last() {
+                    span = span.combine(last.span())
+                }
+                span
+            }
+        }
     }
 }
 
 #[derive(Debug)]
 pub enum Expression {
     Braced(BracedExpression),
-    IntLit(i32),
-    FloatLit(f32),
-    Symbol(String),
+    IntLit(IntLit),
+    FloatLit(FloatLit),
+    Symbol(Symbol),
 }
 
 impl Spanned for Expression {
     fn span(&self) -> Span {
-        todo!()
+        match self {
+            Expression::Braced(braced) => braced.span,
+            Expression::IntLit(int_lit) => int_lit.span,
+            Expression::FloatLit(float_lit) => float_lit.span,
+            Expression::Symbol(symbol) => symbol.span,
+        }
     }
 }
 

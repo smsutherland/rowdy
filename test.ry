@@ -1,6 +1,7 @@
 int main(int y) {
     float x;
-    x = 5.1;
+    x =
+    51;
     y = 12;
     int z = 3;
     y = z;

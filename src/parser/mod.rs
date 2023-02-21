@@ -155,16 +155,16 @@ impl Parse for Expression {
             } => Ok(Expression::Braced(parse(tokens)?)),
             Token {
                 typ: TokenType::IntLit(x),
-                ..
-            } => Ok(Expression::IntLit(x)),
+                span,
+            } => Ok(Expression::IntLit(IntLit { span, value: x })),
             Token {
                 typ: TokenType::FloatLit(x),
-                ..
-            } => Ok(Expression::FloatLit(x)),
+                span,
+            } => Ok(Expression::FloatLit(FloatLit { span, value: x })),
             Token {
                 typ: TokenType::Symbol(s),
-                ..
-            } => Ok(Expression::Symbol(s)),
+                span,
+            } => Ok(Expression::Symbol(Symbol { text: s, span })),
             other => Err(ParseError::UnexpectedToken {
                 expected: "LBrace, IntLit, FloatLit, Symbol",
                 got: other.typ,
