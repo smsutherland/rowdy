@@ -63,7 +63,7 @@ pub fn run(config: Config) {
     // }
 
     let mut ast = parser::parse_tokens(tokens, &compiler);
-    // println!("{ast:#?}");
+    // dbg!(&ast);
 
     type_check(&mut ast, &compiler);
 }

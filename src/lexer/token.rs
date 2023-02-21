@@ -15,7 +15,6 @@ pub enum TokenType {
     IntLit,
     FloatLit,
     End,
-    Eof,
 }
 
 impl fmt::Display for TokenType {
@@ -27,7 +26,6 @@ impl fmt::Display for TokenType {
             Self::IntLit => write!(f, "int lit"),
             Self::FloatLit => write!(f, "float lit"),
             Self::End => write!(f, "end"),
-            Self::Eof => write!(f, "eof"),
         }
     }
 }
@@ -73,7 +71,6 @@ pub enum QualifiedTokenType {
     FloatLit(f32),
     Keyword(Keyword),
     End,
-    Eof,
 }
 
 #[derive(Debug, Clone)]
@@ -143,10 +140,6 @@ pub fn qualify_token(token: Token, code: &str) -> QualifiedToken {
         },
         TokenType::End => QualifiedToken {
             typ: QualifiedTokenType::End,
-            span: token.span,
-        },
-        TokenType::Eof => QualifiedToken {
-            typ: QualifiedTokenType::Eof,
             span: token.span,
         },
     }
