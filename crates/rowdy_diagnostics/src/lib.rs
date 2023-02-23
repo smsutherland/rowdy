@@ -87,6 +87,18 @@ pub fn print_error(span: Span, message: ErrorKind, compiler: &Compiler) {
     eprintln!("{diagnostic}");
 }
 
+pub fn print_warning(span: Span, message: ErrorKind, compiler: &Compiler) {
+    let diagnostic = Diagnostic {
+        span,
+        error_kind: message,
+        relavent_str: span.slice(&compiler.code),
+        level: Level::Warning,
+        compiler,
+    };
+
+    eprintln!("{diagnostic}");
+}
+
 #[derive(Debug)]
 pub enum ErrorKind {
     E0000,

@@ -39,7 +39,7 @@ pub struct Span {
 }
 
 impl Location {
-    fn add_source(self, source: Source) -> SourceLocation {
+    pub fn add_source(self, source: Source) -> SourceLocation {
         SourceLocation {
             file: source,
             loc: self,
