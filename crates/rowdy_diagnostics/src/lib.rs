@@ -1,9 +1,8 @@
-use rowdy_location::Span;
 use rowdy_compiler::Compiler;
+use rowdy_location::Span;
 
 struct Diagnostic<'a> {
     span: Span,
-    relavent_str: &'a str,
     error_kind: ErrorKind,
     level: Level,
     compiler: &'a Compiler,
@@ -50,11 +49,17 @@ impl std::fmt::Display for Diagnostic<'_> {
         writeln!(f, "--> {}:{}", self.compiler.config.source, self.span.start)?;
         write!(
             f,
-            "{}{}| {}",
+            "{}{}| ",
             self.span.start.line,
-            " ".repeat(self.pad_after_line_num()),
-            self.relavent_str
+            " ".repeat(self.pad_after_line_num())
         )?;
+
+        for (i, line) in self.span.lines(&self.compiler.code).lines().enumerate() {
+            if i != 0 {
+                write!(f, "{}| ", " ".repeat(pad))?;
+            }
+            writeln!(f, "{}", line)?;
+        }
 
         Ok(())
     }
@@ -79,7 +84,6 @@ pub fn print_error(span: Span, message: ErrorKind, compiler: &Compiler) {
     let diagnostic = Diagnostic {
         span,
         error_kind: message,
-        relavent_str: span.slice(&compiler.code),
         level: Level::Error,
         compiler,
     };
@@ -91,7 +95,6 @@ pub fn print_warning(span: Span, message: ErrorKind, compiler: &Compiler) {
     let diagnostic = Diagnostic {
         span,
         error_kind: message,
-        relavent_str: span.slice(&compiler.code),
         level: Level::Warning,
         compiler,
     };

@@ -126,6 +126,20 @@ impl Span {
         &s[self.start.char_num..=self.end.char_num]
     }
 
+    pub fn lines<'b>(&self, s: &'b str) -> &'b str {
+        let mut lines = s
+            .lines()
+            .skip(self.start.line - 1)
+            .take(self.end.line - self.start.line + 1);
+        let start = lines.next().unwrap();
+        let end = lines.last().unwrap_or(start);
+        unsafe {
+            let start = start.as_ptr().offset_from(s.as_ptr()) as _;
+            let end = end.as_ptr().add(end.len()).offset_from(s.as_ptr()) as _;
+            &s[start..=end]
+        }
+    }
+
     pub fn combine(&self, other: Self) -> Self {
         let start = self.start.min(other.start);
         let end = self.end.max(other.end);
