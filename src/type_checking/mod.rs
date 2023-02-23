@@ -119,14 +119,22 @@ impl Visit<BracedExpression> for TypeChecker<'_> {
                         .insert(declaration.name.text.clone(), dec_type_id);
                     let initialization_type_id = self.visit(initialization);
                     if dec_type_id != initialization_type_id {
-                        diagnostic::print_error(statement.span(), "TODO".to_owned(), self.compiler)
+                        diagnostic::print_error(
+                            statement.span(),
+                            diagnostic::ErrorKind::E0000,
+                            self.compiler,
+                        )
                     }
                 }
                 Statement::Assignment(target, expression) => {
                     let target_type_id = self.symbol_table.get(&target.text).copied();
                     let expr_type_id = self.visit(expression);
                     if target_type_id != Some(expr_type_id) {
-                        diagnostic::print_error(statement.span(), "TODO".to_owned(), self.compiler)
+                        diagnostic::print_error(
+                            statement.span(),
+                            diagnostic::ErrorKind::E0000,
+                            self.compiler,
+                        )
                     }
                 }
                 Statement::FunctionCall(_name, _params) => todo!(),

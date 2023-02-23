@@ -13,6 +13,18 @@ pub enum Source {
     Anonymous,
 }
 
+impl std::fmt::Display for Source {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Source::File(name) => match name.to_str() {
+                Some(name) => f.write_str(name),
+                None => f.write_str(&name.to_string_lossy()),
+            },
+            Source::Anonymous => f.write_str("unknown"),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct SourceLocation {
     pub file: Source,
