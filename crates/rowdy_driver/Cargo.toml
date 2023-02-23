@@ -11,3 +11,4 @@ rowdy_type_checking = { path = "../rowdy_type_checking" }
 rowdy_compiler = { path = "../rowdy_compiler" }
 rowdy_lexer = { path = "../rowdy_lexer" }
 rowdy_parser = { path = "../rowdy_parser" }
+rowdy_codegen = { path = "../rowdy_codegen" }

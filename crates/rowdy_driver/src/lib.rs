@@ -1,7 +1,7 @@
 use rowdy_compiler::{Compiler, Config};
-use rowdy_type_checking::type_check;
 use rowdy_lexer::tokenize;
 use rowdy_parser::parse_tokens;
+use rowdy_type_checking::type_check;
 
 pub fn run(config: Config) {
     let compiler = Compiler::new(config).expect("TODO: handle errors here");
@@ -14,7 +14,8 @@ pub fn run(config: Config) {
     let mut ast = parse_tokens(tokens, &compiler);
     // dbg!(&ast);
 
-    type_check(&mut ast, &compiler);
+    type_check(&mut ast, &compiler)
+    // TODO: Only do codegen if type checking succeded.
 }
 
 #[test]

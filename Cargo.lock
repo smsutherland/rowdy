@@ -18,6 +18,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "rowdy_codegen"
+version = "0.1.0"
+
+[[package]]
 name = "rowdy_compiler"
 version = "0.1.0"
 dependencies = [
@@ -36,6 +40,7 @@ dependencies = [
 name = "rowdy_driver"
 version = "0.1.0"
 dependencies = [
+ "rowdy_codegen",
  "rowdy_compiler",
  "rowdy_lexer",
  "rowdy_location",
@@ -71,9 +76,4 @@ dependencies = [
  "rowdy_ast",
  "rowdy_compiler",
  "rowdy_diagnostics",
- "rowdy_visitor",
 ]
-
-[[package]]
-name = "rowdy_visitor"
-version = "0.1.0"
