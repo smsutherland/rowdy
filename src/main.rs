@@ -1,4 +1,4 @@
-use rowdy::Config;
+use rowdy_compiler::Config;
 use std::process;
 
 fn main() {
@@ -10,5 +10,5 @@ fn main() {
         }
     };
 
-    rowdy::run(config);
+    rowdy_driver::run(config);
 }

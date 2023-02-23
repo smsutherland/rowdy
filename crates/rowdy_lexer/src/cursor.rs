@@ -1,4 +1,4 @@
-use crate::location::Location;
+use rowdy_location::Location;
 use std::str::Chars;
 
 #[derive(Debug, Clone)]

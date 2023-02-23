@@ -1,9 +1,9 @@
-use crate::{
-    ast::*,
-    lexer::token::{QualifiedToken as Token, QualifiedTokenType as TokenType},
-    lexer::TokenIter,
-    Compiler, Token,
+use rowdy_ast::*;
+use rowdy_lexer::{
+    token::{QualifiedToken as Token, QualifiedTokenType as TokenType},
+    TokenIter,
 };
+use rowdy_compiler::Compiler;
 
 pub fn parse_tokens(mut tokens: TokenIter, _compiler: &Compiler) -> Ast {
     parse(&mut tokens).unwrap()
@@ -150,7 +150,7 @@ impl Parse for Expression {
     fn parse(tokens: &mut TokenIter) -> Result<Self> {
         match tokens.next().ok_or(ParseError::OutOfTokens)? {
             Token {
-                typ: TokenType::SpecialChar(crate::lexer::token::SpecialChar::LBrace),
+                typ: TokenType::SpecialChar(rowdy_lexer::token::SpecialChar::LBrace),
                 ..
             } => Ok(Expression::Braced(parse(tokens)?)),
             Token {
@@ -201,7 +201,7 @@ macro_rules! parse_node {
             fn parse(tokens: &mut TokenIter) -> Result<Self> {
                 match tokens.next() {
                     Some(Token {
-                        typ: TokenType::$kind(crate::lexer::token::$kind::$name),
+                        typ: TokenType::$kind(rowdy_lexer::token::$kind::$name),
                         span,
                     }) => Ok(Self { span }),
                     Some(other) => Err(ParseError::UnexpectedToken {

@@ -1,7 +1,8 @@
-use crate::diagnostic;
-use crate::visit::Visit;
-use crate::{ast::*, Compiler};
+use rowdy_visitor::Visit;
+use rowdy_ast::*;
+use rowdy_compiler::Compiler;
 use std::collections::HashMap;
+use rowdy_diagnostics as diagnostic;
 
 pub fn type_check(ast: &mut Ast, compiler: &Compiler) {
     let mut checker = TypeChecker::new(compiler);

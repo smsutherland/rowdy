@@ -1,4 +1,4 @@
-use crate::location::Span;
+use rowdy_location::Span;
 
 pub trait Spanned {
     fn span(&self) -> Span;
@@ -125,16 +125,16 @@ impl Spanned for Symbol {
 
 #[macro_export]
 macro_rules! Token {
-    [,] => {$crate::ast::Comma};
-    [;] => {$crate::ast::End};
-    [+] => {$crate::ast::Plus};
-    [+=] => {$crate::ast::PlusAssign};
-    [++] => {$crate::ast::Increment};
-    [-] => {$crate::ast::Sub};
-    [-=] => {$crate::ast::SubAssign};
-    [--] => {$crate::ast::Decrement};
-    [=] => {$crate::ast::Assign};
-    [==] => {$crate::ast::Equals};
+    [,] => {$crate::Comma};
+    [;] => {$crate::End};
+    [+] => {$crate::Plus};
+    [+=] => {$crate::PlusAssign};
+    [++] => {$crate::Increment};
+    [-] => {$crate::Sub};
+    [-=] => {$crate::SubAssign};
+    [--] => {$crate::Decrement};
+    [=] => {$crate::Assign};
+    [==] => {$crate::Equals};
 }
 
 macro_rules! make_node {

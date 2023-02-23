@@ -1,17 +1,5 @@
-#![allow(dead_code)]
-#![warn(missing_debug_implementations)]
-
-mod ast;
-mod diagnostic;
-mod lexer;
-mod location;
-mod parser;
-mod type_checking;
-mod visit;
-
-use location::Source;
+use rowdy_location::Source;
 use std::io::Read;
-use type_checking::type_check;
 
 #[derive(Debug)]
 pub struct Config {
@@ -33,8 +21,8 @@ impl Config {
 
 #[derive(Debug)]
 pub struct Compiler {
-    config: Config,
-    code: String,
+    pub config: Config,
+    pub code: String,
 }
 
 impl Compiler {
@@ -52,26 +40,4 @@ impl Compiler {
         }
         Ok(c)
     }
-}
-
-pub fn run(config: Config) {
-    let compiler = Compiler::new(config).expect("TODO: handle errors here");
-    let tokens = lexer::tokenize(&compiler);
-
-    // for t in tokens.clone() {
-    //     println!("{t:?}");
-    // }
-
-    let mut ast = parser::parse_tokens(tokens, &compiler);
-    // dbg!(&ast);
-
-    type_check(&mut ast, &compiler);
-}
-
-#[test]
-fn compile_testry() {
-    let config = Config {
-        source: Source::File("./test.ry".into()),
-    };
-    run(config);
 }

@@ -1,7 +1,7 @@
 mod cursor;
 pub mod token;
-use crate::location::{Location, Span};
-use crate::Compiler;
+use rowdy_location::{Location, Span};
+use rowdy_compiler::Compiler;
 use cursor::Cursor;
 use token::qualify_token;
 use token::*;

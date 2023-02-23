@@ -1,5 +1,5 @@
-use crate::location::Span;
-use crate::Compiler;
+use rowdy_location::Span;
+use rowdy_compiler::Compiler;
 
 struct Diagnostic<'a> {
     span: Span,

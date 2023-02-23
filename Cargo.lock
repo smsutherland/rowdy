@@ -5,3 +5,75 @@ version = 3
 [[package]]
 name = "rowdy"
 version = "0.1.0"
+dependencies = [
+ "rowdy_compiler",
+ "rowdy_driver",
+]
+
+[[package]]
+name = "rowdy_ast"
+version = "0.1.0"
+dependencies = [
+ "rowdy_location",
+]
+
+[[package]]
+name = "rowdy_compiler"
+version = "0.1.0"
+dependencies = [
+ "rowdy_location",
+]
+
+[[package]]
+name = "rowdy_diagnostics"
+version = "0.1.0"
+dependencies = [
+ "rowdy_compiler",
+ "rowdy_location",
+]
+
+[[package]]
+name = "rowdy_driver"
+version = "0.1.0"
+dependencies = [
+ "rowdy_compiler",
+ "rowdy_lexer",
+ "rowdy_location",
+ "rowdy_parser",
+ "rowdy_type_checking",
+]
+
+[[package]]
+name = "rowdy_lexer"
+version = "0.1.0"
+dependencies = [
+ "rowdy_compiler",
+ "rowdy_location",
+]
+
+[[package]]
+name = "rowdy_location"
+version = "0.1.0"
+
+[[package]]
+name = "rowdy_parser"
+version = "0.1.0"
+dependencies = [
+ "rowdy_ast",
+ "rowdy_compiler",
+ "rowdy_lexer",
+]
+
+[[package]]
+name = "rowdy_type_checking"
+version = "0.1.0"
+dependencies = [
+ "rowdy_ast",
+ "rowdy_compiler",
+ "rowdy_diagnostics",
+ "rowdy_visitor",
+]
+
+[[package]]
+name = "rowdy_visitor"
+version = "0.1.0"

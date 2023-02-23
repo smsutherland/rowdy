@@ -1,0 +1,12 @@
+[package]
+name = "rowdy_type_checking"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rowdy_visitor = { path = "../rowdy_visitor" }
+rowdy_ast = { path = "../rowdy_ast" }
+rowdy_compiler = { path = "../rowdy_compiler" }
+rowdy_diagnostics = { path = "../rowdy_diagnostics" }

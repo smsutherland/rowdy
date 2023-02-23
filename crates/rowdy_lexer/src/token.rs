@@ -1,4 +1,4 @@
-use crate::location::Span;
+use rowdy_location::Span;
 use std::fmt;
 
 #[derive(Debug, Clone)]

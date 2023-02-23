@@ -1,10 +1,9 @@
 [package]
-name = "rowdy"
+name = "rowdy_ast"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rowdy_driver = { path = "crates/rowdy_driver" }
-rowdy_compiler = { path = "crates/rowdy_compiler" }
+rowdy_location = { path = "../rowdy_location" }
