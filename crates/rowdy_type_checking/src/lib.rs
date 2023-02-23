@@ -1,4 +1,3 @@
-use rowdy_visitor::Visit;
 use rowdy_ast::*;
 use rowdy_compiler::Compiler;
 use std::collections::HashMap;
@@ -156,4 +155,10 @@ impl Visit<Expression> for TypeChecker<'_> {
             Expression::Symbol(symbol) => *self.symbol_table.get(&symbol.text).unwrap(),
         }
     }
+}
+
+trait Visit<Node> {
+    type Output;
+
+    fn visit(&mut self, node: &Node) -> Self::Output;
 }
