@@ -6,9 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rowdy_location = { path = "../rowdy_location" }
-rowdy_type_checking = { path = "../rowdy_type_checking" }
 rowdy_compiler = { path = "../rowdy_compiler" }
 rowdy_lexer = { path = "../rowdy_lexer" }
 rowdy_parser = { path = "../rowdy_parser" }
+rowdy_type_checking = { path = "../rowdy_type_checking" }
 rowdy_codegen = { path = "../rowdy_codegen" }
+rowdy_interpreter = { path = "../rowdy_interpreter" }

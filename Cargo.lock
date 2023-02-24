@@ -71,10 +71,17 @@ version = "0.1.0"
 dependencies = [
  "rowdy_codegen",
  "rowdy_compiler",
+ "rowdy_interpreter",
  "rowdy_lexer",
- "rowdy_location",
  "rowdy_parser",
  "rowdy_type_checking",
+]
+
+[[package]]
+name = "rowdy_interpreter"
+version = "0.1.0"
+dependencies = [
+ "rowdy_bytecode",
 ]
 
 [[package]]
