@@ -1,10 +1,9 @@
 [package]
-name = "rowdy_codegen"
+name = "rowdy_bytecode"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rowdy_ast = { path = "../rowdy_ast" }
-rowdy_bytecode = { path = "../rowdy_bytecode" }
+rowdy_macros = { path = "../rowdy_macros" }
