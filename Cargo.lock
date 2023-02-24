@@ -39,6 +39,7 @@ dependencies = [
 name = "rowdy_codegen"
 version = "0.1.0"
 dependencies = [
+ "rowdy_ast",
  "rowdy_macros",
 ]
 

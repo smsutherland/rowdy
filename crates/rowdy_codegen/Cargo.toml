@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 rowdy_macros = { path = "../rowdy_macros" }
+rowdy_ast = { path = "../rowdy_ast" }

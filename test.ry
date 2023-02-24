@@ -1,7 +1,5 @@
-int main(int y) {
-    float x;
-    x = 51.;
-    y = 12;
+int main() {
+    int y = 12;
     int z = 3;
     y = z;
 }

@@ -43,6 +43,7 @@ fn make_consts(emun: &syn::DataEnum) -> TokenStream {
     quote! {#(#consts)*}
 }
 
+// TODO: endianness
 #[proc_macro_derive(AsBytes)]
 pub fn as_bytes_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -159,14 +160,15 @@ fn make_arm_body(variant: &syn::Ident, fields: &HandledFields) -> TokenStream {
             let mut bytes = quote! {1};
             let set_bytes = fields.iter().map(|(name, ty)| {
                 let result = quote! {
-                    ::core::mem::forget(::core::mem::replace(
-                        &mut <&[u8] as ::core::convert::TryInto<[u8; ::core::mem::size_of::<#ty>()]>>::try_into(
-                            &result[(#bytes)..(#bytes) + ::core::mem::size_of::<#ty>()]
-                        ).unwrap(),
-                        unsafe {::core::mem::transmute(*#name)}
-                    ));
+                    ::core::mem::forget(unsafe{::core::mem::replace(
+                        (&mut result[(#bytes)..(#bytes) + ::core::mem::size_of::<#ty>()]
+                            as *mut _ as *mut [u8; ::core::mem::size_of::<#ty>()]
+                        ).as_mut()
+                        .unwrap(),
+                        ::core::mem::transmute(*#name)
+                    )});
                 };
-                bytes = quote! { #bytes + ::core::mem::size_of_val(&#name)};
+                bytes = quote! { #bytes + ::core::mem::size_of::<#ty>()};
                 result
             });
             quote! {
