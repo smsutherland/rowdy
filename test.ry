@@ -1,5 +1,4 @@
 int main() {
     int y = 12;
     int z = 3;
-    y = z;
 }
