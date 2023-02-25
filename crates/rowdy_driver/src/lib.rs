@@ -3,6 +3,7 @@ use rowdy_compiler::{Compiler, Config};
 use rowdy_lexer::tokenize;
 use rowdy_parser::parse_tokens;
 use rowdy_type_checking::type_check;
+use rowdy_interpreter::interpret_bytecode;
 
 pub fn run(config: Config) {
     let compiler = Compiler::new(config).expect("TODO: handle errors here");
@@ -18,7 +19,8 @@ pub fn run(config: Config) {
     type_check(&mut ast, &compiler);
     // TODO: Only do codegen if type checking succeded.
     let bytecode = generate_bytecode(&ast);
-    dbg!(bytecode);
+    dbg!(&bytecode);
+    interpret_bytecode(bytecode);
 }
 
 #[test]
