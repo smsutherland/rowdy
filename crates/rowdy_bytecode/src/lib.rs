@@ -30,6 +30,10 @@ impl Bytecode {
     pub fn len(&self) -> usize {
         self.vec.len()
     }
+
+    pub fn iter(&self) -> BytecodeIter {
+        BytecodeIter::new(self)
+    }
 }
 
 impl<'a> IntoIterator for &'a Bytecode {
@@ -38,7 +42,7 @@ impl<'a> IntoIterator for &'a Bytecode {
     type IntoIter = BytecodeIter<'a>;
 
     fn into_iter(self) -> Self::IntoIter {
-        BytecodeIter::new(self)
+        self.iter()
     }
 }
 
