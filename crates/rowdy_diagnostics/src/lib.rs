@@ -31,6 +31,7 @@ impl Diagnostic<'_> {
         self.get_pad() - padding
     }
 
+    #[allow(dead_code)]
     fn write_padding(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let left_padding = self.get_pad();
         f.write_str(&" ".repeat(left_padding))

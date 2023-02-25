@@ -27,7 +27,9 @@ struct TypeChecker<'a> {
 
 #[derive(Debug)]
 struct FunctionInfo {
+    #[allow(dead_code)]
     return_type: TypeID,
+    #[allow(dead_code)]
     parameter_types: Vec<TypeID>,
 }
 
