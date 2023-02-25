@@ -1,13 +1,18 @@
-use rowdy_bytecode::{Bytecode, Instruction};
 use rowdy_ast::*;
+use rowdy_bytecode::{Bytecode, Instruction};
 
 pub fn generate_bytecode(ast: &Ast) -> Bytecode {
-    let mut code = Bytecode::default();
-    code.visit(ast);
-    code
+    let mut gen = Generator::default();
+    gen.visit(ast);
+    gen.bytecode
 }
 
-impl Visit<Ast> for Bytecode {
+#[derive(Debug, Default)]
+struct Generator {
+    bytecode: Bytecode,
+}
+
+impl Visit<Ast> for Generator {
     type Output = ();
 
     fn visit(&mut self, node: &Ast) -> Self::Output {
@@ -20,7 +25,7 @@ impl Visit<Ast> for Bytecode {
     }
 }
 
-impl Visit<Function> for Bytecode {
+impl Visit<Function> for Generator {
     type Output = ();
 
     fn visit(&mut self, node: &Function) -> Self::Output {
@@ -28,7 +33,7 @@ impl Visit<Function> for Bytecode {
     }
 }
 
-impl Visit<BracedExpression> for Bytecode {
+impl Visit<BracedExpression> for Generator {
     type Output = ();
 
     fn visit(&mut self, node: &BracedExpression) -> Self::Output {
@@ -38,7 +43,7 @@ impl Visit<BracedExpression> for Bytecode {
     }
 }
 
-impl Visit<Statement> for Bytecode {
+impl Visit<Statement> for Generator {
     type Output = ();
 
     fn visit(&mut self, node: &Statement) -> Self::Output {
@@ -51,13 +56,13 @@ impl Visit<Statement> for Bytecode {
     }
 }
 
-impl Visit<Expression> for Bytecode {
+impl Visit<Expression> for Generator {
     type Output = ();
 
     fn visit(&mut self, node: &Expression) -> Self::Output {
         match node {
             Expression::Braced(_) => todo!(),
-            Expression::IntLit(lit) => self.push(Instruction::Push(lit.value)),
+            Expression::IntLit(lit) => self.bytecode.push(Instruction::Push(lit.value)),
             Expression::FloatLit(_) => todo!(),
             Expression::Symbol(_) => todo!(),
         };
