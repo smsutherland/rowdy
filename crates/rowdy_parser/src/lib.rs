@@ -1,9 +1,9 @@
-use rowdy_ast::*;
+use rowdy_ast::{untyped::*, Token};
+use rowdy_compiler::Compiler;
 use rowdy_lexer::{
     token::{QualifiedToken as Token, QualifiedTokenType as TokenType},
     TokenIter,
 };
-use rowdy_compiler::Compiler;
 
 pub fn parse_tokens(mut tokens: TokenIter, _compiler: &Compiler) -> Ast {
     parse(&mut tokens).unwrap()

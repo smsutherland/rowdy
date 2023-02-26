@@ -1,4 +1,4 @@
-use rowdy_ast::*;
+use rowdy_ast::untyped::*;
 use rowdy_compiler::Compiler;
 use std::collections::HashMap;
 use rowdy_diagnostics as diagnostic;

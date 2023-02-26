@@ -1,4 +1,4 @@
-use rowdy_ast::*;
+use rowdy_ast::untyped::*;
 use rowdy_bytecode::{Bytecode, Instruction};
 
 pub fn generate_bytecode(ast: &Ast) -> Bytecode {
