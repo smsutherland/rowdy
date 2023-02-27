@@ -9,3 +9,4 @@ edition = "2021"
 rowdy_ast = { path = "../rowdy_ast" }
 rowdy_compiler = { path = "../rowdy_compiler" }
 rowdy_diagnostics = { path = "../rowdy_diagnostics" }
+rowdy_types = { path = "../rowdy_types" }

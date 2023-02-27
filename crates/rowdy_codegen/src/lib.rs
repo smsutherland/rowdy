@@ -1,4 +1,4 @@
-use rowdy_ast::typed::*;
+use rowdy_ast::{base, typed::*};
 use rowdy_bytecode::{Bytecode, Instruction};
 
 pub fn generate_bytecode(ast: &Ast) -> Bytecode {
@@ -60,11 +60,11 @@ impl Visit<Expression> for Generator {
     type Output = ();
 
     fn visit(&mut self, node: &Expression) -> Self::Output {
-        match node {
-            Expression::Braced(_) => todo!(),
-            Expression::IntLit(lit) => self.bytecode.push(Instruction::Push(lit.value)),
-            Expression::FloatLit(_) => todo!(),
-            Expression::Symbol(_) => todo!(),
+        match node.inner {
+            base::Expression::Braced(_) => todo!(),
+            base::Expression::IntLit(lit) => self.bytecode.push(Instruction::Push(lit.value)),
+            base::Expression::FloatLit(_) => todo!(),
+            base::Expression::Symbol(_) => todo!(),
         };
     }
 }

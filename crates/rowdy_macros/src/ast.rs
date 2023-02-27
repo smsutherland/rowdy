@@ -99,7 +99,7 @@ pub fn ast(
                             let new_struct: syn::ItemStruct = syn::parse_quote! {
                                 #(#attrs)*
                                 #vis #struct_token #ident #generics {
-                                    inner: super::#base_ident::#ident #generics,
+                                    pub inner: super::#base_ident::#ident #generics,
                                     #additional_fields
                                 }
                             };
@@ -165,7 +165,7 @@ pub fn ast(
                             let new_struct: syn::ItemStruct = syn::parse_quote! {
                                 #(#attrs)*
                                 #vis struct #ident #generics {
-                                    inner: super::#base_ident::#ident #generics,
+                                    pub inner: super::#base_ident::#ident #generics,
                                     #additional_fields
                                 }
                             };
