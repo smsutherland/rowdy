@@ -183,6 +183,13 @@ pub mod base {
         }
     }
 
+    #[ast::typed]
+    impl Spanned for Expression {
+        fn span(&self) -> Span {
+            self.inner.span()
+        }
+    }
+
     #[ast::typed{pub typ: ::rowdy_types::TypeID}]
     #[derive(Debug)]
     pub struct Type {
