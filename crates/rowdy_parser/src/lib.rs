@@ -1,4 +1,4 @@
-use rowdy_ast::{untyped::*, Token};
+use rowdy_ast::{base::*, Token};
 use rowdy_compiler::Compiler;
 use rowdy_lexer::{
     token::{QualifiedToken as Token, QualifiedTokenType as TokenType},

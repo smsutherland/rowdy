@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{parse_macro_input, spanned::Spanned, DeriveInput};
+use syn::{parse_macro_input, DeriveInput};
 
 #[inline]
 pub fn bytes_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -93,6 +93,7 @@ fn make_consts(emun: &EnumInput) -> TokenStream {
 }
 
 // TODO: endianness
+// TODO: alignments
 fn as_bytes(input: &EnumInput) -> TokenStream {
     let enum_ident = &input.ident;
 
@@ -171,7 +172,7 @@ fn handle_fields(fields: &syn::Fields) -> HandledFields {
                 .collect(),
         },
         syn::Fields::Unnamed(fields) => {
-            let mut field_num = 0;
+            let mut field_num: u32 = 0;
             HandledFields::Unnamed {
                 fields: fields
                     .unnamed
@@ -179,7 +180,7 @@ fn handle_fields(fields: &syn::Fields) -> HandledFields {
                     .map(|field| {
                         field_num += 1;
                         (
-                            syn::Ident::new(&format!("field{}", field_num), field.span()),
+                            quote::format_ident!("field{}", field_num),
                             field.ty.clone(),
                         )
                     })

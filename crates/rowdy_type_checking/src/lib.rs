@@ -1,4 +1,4 @@
-use rowdy_ast::untyped::*;
+use rowdy_ast::base::*;
 use rowdy_compiler::Compiler;
 use std::collections::HashMap;
 use rowdy_diagnostics as diagnostic;
@@ -14,8 +14,6 @@ pub fn type_check(ast: &mut Ast, compiler: &Compiler) {
 // 2.1. primitive types already have a type id
 // 3. store types by their internal id
 
-type TypeID = u32;
-
 #[derive(Debug)]
 struct TypeChecker<'a> {
     functions: HashMap<String, FunctionInfo>,
@@ -23,14 +21,6 @@ struct TypeChecker<'a> {
     next_key: TypeID,
     symbol_table: HashMap<String, TypeID>,
     compiler: &'a Compiler,
-}
-
-#[derive(Debug)]
-struct FunctionInfo {
-    #[allow(dead_code)]
-    return_type: TypeID,
-    #[allow(dead_code)]
-    parameter_types: Vec<TypeID>,
 }
 
 impl<'a> TypeChecker<'a> {
