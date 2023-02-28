@@ -69,7 +69,7 @@ pub mod base {
 
     pub type Ast = Program;
 
-    #[ast::typed{pub typ: ::rowdy_types::FnSignature}]
+    #[ast::typed{pub typed: ::rowdy_types::FnSignature}]
     #[derive(Debug)]
     pub struct Function {
         pub span: Span,
@@ -85,7 +85,7 @@ pub mod base {
         }
     }
 
-    #[ast::typed{pub typ: ::rowdy_types::TypeID}]
+    #[ast::typed{pub typed: ::rowdy_types::TypeID}]
     #[derive(Debug)]
     pub struct Declaration {
         pub span: Span,
@@ -99,7 +99,7 @@ pub mod base {
         }
     }
 
-    #[ast::typed{pub typ: ::rowdy_types::TypeID}]
+    #[ast::typed{pub typed: ::rowdy_types::TypeID}]
     #[derive(Debug)]
     pub struct BracedExpression {
         pub span: Span,
@@ -136,7 +136,7 @@ pub mod base {
         }
     }
 
-    #[ast::typed{pub typ: ::rowdy_types::TypeID}]
+    #[ast::typed{pub typed: ::rowdy_types::TypeID}]
     #[derive(Debug)]
     pub struct IntLit {
         pub span: Span,
@@ -149,7 +149,7 @@ pub mod base {
         }
     }
 
-    #[ast::typed{pub typ: ::rowdy_types::TypeID}]
+    #[ast::typed{pub typed: ::rowdy_types::TypeID}]
     #[derive(Debug)]
     pub struct FloatLit {
         pub span: Span,
@@ -162,7 +162,7 @@ pub mod base {
         }
     }
 
-    #[ast::typed{pub typ: ::rowdy_types::TypeID}]
+    #[ast::typed{pub typed: ::rowdy_types::TypeID}]
     #[derive(Debug)]
     pub enum Expression {
         Braced(BracedExpression),
@@ -186,7 +186,12 @@ pub mod base {
     #[ast::typed]
     impl Spanned for Expression {
         fn span(&self) -> Span {
-            self.inner.span()
+            match &self.inner {
+                ExpressionInner::Braced(braced) => braced.span,
+                ExpressionInner::IntLit(int_lit) => int_lit.span,
+                ExpressionInner::FloatLit(float_lit) => float_lit.span,
+                ExpressionInner::Symbol(symbol) => symbol.span,
+            }
         }
     }
 

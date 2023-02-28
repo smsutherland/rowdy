@@ -94,37 +94,23 @@ pub fn ast(
                                 ref struct_token,
                                 ref ident,
                                 ref generics,
+                                ref fields,
                                 ..
                             } = item_struct;
-                            let new_struct: syn::ItemStruct = syn::parse_quote! {
-                                #(#attrs)*
-                                #vis #struct_token #ident #generics {
-                                    pub inner: super::#base_ident::#ident #generics,
-                                    #additional_fields
-                                }
-                            };
-                            add_content(modd, new_struct);
-
-                            let new_deref: syn::ItemImpl = syn::parse_quote! {
-                                impl #generics ::std::ops::Deref for #ident #generics {
-                                    type Target = super::#base_ident::#ident #generics;
-
-                                    fn deref(&self) -> &Self::Target {
-                                        &self.inner
+                            if let syn::Fields::Named(syn::FieldsNamed { named: fields, .. }) =
+                                fields
+                            {
+                                let new_struct: syn::ItemStruct = syn::parse_quote! {
+                                    #(#attrs)*
+                                    #vis #struct_token #ident #generics {
+                                        #fields
+                                        #additional_fields
                                     }
-                                }
-                            };
-                            add_content(modd, new_deref);
-
-                            let new_deref_mut: syn::ItemImpl = syn::parse_quote! {
-                                impl #generics ::std::ops::DerefMut for #ident #generics {
-                                    fn deref_mut(&mut self) -> &mut Self::Target {
-                                        &mut self.inner
-                                    }
-                                }
-                            };
-                            add_content(modd, new_deref_mut);
+                                };
+                                add_content(modd, new_struct);
+                            }
                         }
+
                         None => errors.push(syn::Error::new_spanned(
                             annotation.module,
                             "module not specified in original macro invocation or the base module",
@@ -162,10 +148,13 @@ pub fn ast(
                                 ref generics,
                                 ..
                             } = item_enum;
+
+                            let inner_enum = quote::format_ident!("{}Inner", ident);
+
                             let new_struct: syn::ItemStruct = syn::parse_quote! {
                                 #(#attrs)*
                                 #vis struct #ident #generics {
-                                    pub inner: super::#base_ident::#ident #generics,
+                                    pub inner: #inner_enum #generics,
                                     #additional_fields
                                 }
                             };
@@ -173,7 +162,7 @@ pub fn ast(
 
                             let new_deref: syn::ItemImpl = syn::parse_quote! {
                                 impl #generics ::std::ops::Deref for #ident #generics {
-                                    type Target = super::#base_ident::#ident #generics;
+                                    type Target = #inner_enum #generics;
 
                                     fn deref(&self) -> &Self::Target {
                                         &self.inner
@@ -190,6 +179,11 @@ pub fn ast(
                                 }
                             };
                             add_content(modd, new_deref_mut);
+
+                            let mut inner = item_enum.clone();
+                            inner.ident = inner_enum;
+
+                            add_content(modd, inner);
                         }
                         None => errors.push(syn::Error::new_spanned(
                             annotation.module,

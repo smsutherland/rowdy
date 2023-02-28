@@ -16,9 +16,9 @@ pub fn run(config: Config) {
     let mut ast = parse_tokens(tokens, &compiler);
     // dbg!(&ast);
 
-    type_check(&mut ast, &compiler);
+    let typed_ast = type_check(&mut ast, &compiler);
     // TODO: Only do codegen if type checking succeded.
-    let bytecode = generate_bytecode(&ast);
+    let bytecode = generate_bytecode(&typed_ast);
     interpret_bytecode(bytecode);
 }
 
