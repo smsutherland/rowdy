@@ -62,14 +62,14 @@ pub mod base {
     pub use super::*;
     use rowdy_location::Span;
 
-    #[derive(Debug)]
+    #[derive(Debug, Default)]
     pub struct Program {
         pub functions: Vec<Function>,
     }
 
     pub type Ast = Program;
 
-    #[ast::typed{pub typed: ::rowdy_types::FnSignature}]
+    #[ast::typed{pub signature: ::rowdy_types::FnSignature}]
     #[derive(Debug)]
     pub struct Function {
         pub span: Span,
@@ -214,7 +214,7 @@ pub mod base {
         }
     }
 
-    #[ast::typed{pub typ: ::rowdy_types::TypeID}]
+    #[ast::typed{pub typed: ::rowdy_types::TypeID}]
     #[derive(Debug)]
     pub struct Symbol {
         pub text: String,
@@ -224,6 +224,12 @@ pub mod base {
     impl Spanned for Symbol {
         fn span(&self) -> Span {
             self.span
+        }
+    }
+
+    impl std::fmt::Display for Symbol {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_str(&self.text)
         }
     }
 }

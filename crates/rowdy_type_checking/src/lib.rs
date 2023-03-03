@@ -2,7 +2,7 @@ use rowdy_ast::{base, typed, Spanned};
 use rowdy_compiler::Compiler;
 use rowdy_diagnostics as diagnostic;
 use rowdy_types::{FnSignature, TypeID};
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 
 pub fn type_check(ast: &base::Ast, compiler: &Compiler) -> typed::Ast {
     let mut checker = TypeChecker::new(compiler);
@@ -16,20 +16,20 @@ pub fn type_check(ast: &base::Ast, compiler: &Compiler) -> typed::Ast {
 
 #[derive(Debug)]
 struct TypeChecker<'a> {
-    functions: HashMap<String, FnSignature>,
-    types: HashMap<String, TypeID>,
+    functions: BTreeMap<String, FnSignature>,
+    types: BTreeMap<String, TypeID>,
     next_key: TypeID,
-    symbol_table: HashMap<String, TypeID>,
+    symbol_table: BTreeMap<String, TypeID>,
     compiler: &'a Compiler,
 }
 
 impl<'a> TypeChecker<'a> {
     fn new(compiler: &'a Compiler) -> Self {
         Self {
-            functions: HashMap::new(),
-            types: HashMap::new(),
+            functions: BTreeMap::new(),
+            types: BTreeMap::new(),
             next_key: 0,
-            symbol_table: HashMap::new(),
+            symbol_table: BTreeMap::new(),
             compiler,
         }
     }
@@ -50,7 +50,7 @@ impl<'a> TypeChecker<'a> {
 impl Visit<base::Ast> for TypeChecker<'_> {
     type Output = typed::Ast;
 
-    fn visit(&mut self, node: &base::Ast) -> typed::Ast {
+    fn visit(&mut self, node: &base::Ast) -> Self::Output {
         self.functions = node
             .functions
             .iter()
@@ -70,17 +70,18 @@ impl Visit<base::Ast> for TypeChecker<'_> {
             })
             .collect();
 
+        let mut result = typed::Ast::default();
         for func in &node.functions {
-            self.visit(func);
+            result.functions.push(self.visit(func));
         }
-        todo!()
+        result
     }
 }
 
 impl Visit<base::Function> for TypeChecker<'_> {
-    type Output = ();
+    type Output = typed::Function;
 
-    fn visit(&mut self, node: &base::Function) {
+    fn visit(&mut self, node: &base::Function) -> Self::Output {
         self.symbol_table.clear();
         for param in &node.parameters {
             let param_type_id = self.type_name_lookup(&param.typ.symbol.text);
@@ -90,14 +91,25 @@ impl Visit<base::Function> for TypeChecker<'_> {
 
         self.visit(&node.expr);
 
-        // println!("{:?}", self.symbol_table);
+        typed::Function {
+            span: node.span,
+            return_type: self.visit(&node.return_type),
+            name: self.visit(&node.name),
+            parameters: self.visit(&node.parameters),
+            expr: self.visit(&node.expr),
+            signature: self
+                .functions
+                .get(&node.name.text)
+                .expect("Visited function without first putting it in the functions map")
+                .clone(),
+        }
     }
 }
 
 impl Visit<base::BracedExpression> for TypeChecker<'_> {
-    type Output = TypeID;
+    type Output = typed::BracedExpression;
 
-    fn visit(&mut self, node: &base::BracedExpression) -> TypeID {
+    fn visit(&mut self, node: &base::BracedExpression) -> Self::Output {
         for statement in &node.statements {
             // println!("{statement:#?}");
             match statement {
@@ -110,7 +122,7 @@ impl Visit<base::BracedExpression> for TypeChecker<'_> {
                     let dec_type_id = self.type_name_lookup(&declaration.typ.symbol.text);
                     self.symbol_table
                         .insert(declaration.name.text.clone(), dec_type_id);
-                    let initialization_type_id = self.visit(initialization);
+                    let initialization_type_id = self.visit(initialization).typed;
                     if dec_type_id != initialization_type_id {
                         diagnostic::print_error(
                             statement.span(),
@@ -121,7 +133,7 @@ impl Visit<base::BracedExpression> for TypeChecker<'_> {
                 }
                 base::Statement::Assignment(target, expression) => {
                     let target_type_id = self.symbol_table.get(&target.text).copied();
-                    let expr_type_id = self.visit(expression);
+                    let expr_type_id = self.visit(expression).typed;
                     if target_type_id != Some(expr_type_id) {
                         diagnostic::print_error(
                             statement.span(),
@@ -133,20 +145,85 @@ impl Visit<base::BracedExpression> for TypeChecker<'_> {
                 base::Statement::FunctionCall(_name, _params) => todo!(),
             }
         }
-        0
+        todo!()
     }
 }
 
 impl Visit<base::Expression> for TypeChecker<'_> {
-    type Output = TypeID;
+    type Output = typed::Expression;
 
-    fn visit(&mut self, node: &base::Expression) -> TypeID {
+    fn visit(&mut self, node: &base::Expression) -> Self::Output {
         match node {
-            base::Expression::Braced(braced_expr) => self.visit(braced_expr),
-            base::Expression::IntLit(_) => self.type_name_lookup("int"),
-            base::Expression::FloatLit(_) => self.type_name_lookup("float"),
-            base::Expression::Symbol(symbol) => *self.symbol_table.get(&symbol.text).unwrap(),
+            base::Expression::Braced(braced_expr) => {
+                // TODO: Make this into an .into() call by doing _more_ macros on the AST
+                let visited = self.visit(braced_expr);
+                typed::Expression {
+                    typed: visited.typed,
+                    inner: typed::ExpressionInner::Braced(visited),
+                }
+            }
+            base::Expression::IntLit(int_lit) => {
+                let visited = self.visit(int_lit);
+                typed::Expression {
+                    typed: visited.typed,
+                    inner: typed::ExpressionInner::IntLit(visited),
+                }
+            }
+            base::Expression::FloatLit(float_lit) => {
+                let visited = self.visit(float_lit);
+                typed::Expression {
+                    typed: visited.typed,
+                    inner: typed::ExpressionInner::FloatLit(visited),
+                }
+            }
+            base::Expression::Symbol(symbol) => {
+                let visited = self.visit(symbol);
+                typed::Expression {
+                    typed: visited.typed,
+                    inner: typed::ExpressionInner::Symbol(visited),
+                }
+            }
         }
+    }
+}
+
+impl Visit<base::IntLit> for TypeChecker<'_> {
+    type Output = typed::IntLit;
+
+    fn visit(&mut self, node: &base::IntLit) -> Self::Output {
+        todo!()
+    }
+}
+
+impl Visit<base::FloatLit> for TypeChecker<'_> {
+    type Output = typed::FloatLit;
+
+    fn visit(&mut self, node: &base::FloatLit) -> Self::Output {
+        todo!()
+    }
+}
+
+impl Visit<base::Symbol> for TypeChecker<'_> {
+    type Output = typed::Symbol;
+
+    fn visit(&mut self, node: &base::Symbol) -> Self::Output {
+        todo!()
+    }
+}
+
+impl Visit<base::Type> for TypeChecker<'_> {
+    type Output = typed::Type;
+
+    fn visit(&mut self, node: &base::Type) -> Self::Output {
+        todo!()
+    }
+}
+
+impl Visit<Vec<base::Declaration>> for TypeChecker<'_> {
+    type Output = Vec<typed::Declaration>;
+
+    fn visit(&mut self, node: &Vec<base::Declaration>) -> Self::Output {
+        todo!()
     }
 }
 
